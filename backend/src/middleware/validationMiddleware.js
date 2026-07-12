@@ -7,7 +7,7 @@ const validateSignup = (req, res, next) => {
     return res.status(400).json({ success: false, message: 'Please provide a valid name' });
   }
 
-  const emailRegex = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
+  const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
   if (!email || !emailRegex.test(email)) {
     return res.status(400).json({ success: false, message: 'Please provide a valid email address' });
   }
