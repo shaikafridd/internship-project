@@ -25,6 +25,32 @@ const Checkout = () => {
     setLoading(true);
     setError('');
     try {
+      // Fallback for general premium payments or invalid ObjectId
+      if (!courseId || courseId.length !== 24) {
+        const base = 1499;
+        const discount = discountCode.toUpperCase() === 'WELCOME10' ? 150 : 0;
+        const subtotal = base - discount;
+        const gst = Math.round(subtotal * 0.18 * 100) / 100;
+        const total = Math.round((subtotal + gst) * 100) / 100;
+
+        setInvoice({
+          orderId: 'mock_premium_upgrade_order',
+          courseTitle: 'Premium Membership Upgrade',
+          basePrice: base,
+          discountCode: discountCode || '',
+          discountAmount: discount,
+          gstAmount: gst,
+          totalAmount: total,
+          paymentMethod: 'Card',
+          status: 'Pending'
+        });
+        if (discountCode) {
+          setAppliedCoupon(discountCode);
+        }
+        setLoading(false);
+        return;
+      }
+
       const res = await paymentAPI.checkout(courseId, discountCode, 'Card');
       if (res.success && res.data) {
         setInvoice(res.data);

@@ -55,6 +55,7 @@ const AppContent = () => {
           <Route path="/courses" element={<ProtectedRoute><Courses /></ProtectedRoute>} />
           <Route path="/courses/:id" element={<ProtectedRoute><CourseDetails /></ProtectedRoute>} />
           <Route path="/checkout/:courseId" element={<ProtectedRoute><Checkout /></ProtectedRoute>} />
+          <Route path="/payments" element={<ProtectedRoute><Checkout /></ProtectedRoute>} />
           <Route path="/my-courses/:courseId" element={<ProtectedRoute><MyCourses /></ProtectedRoute>} />
           <Route path="/jobs" element={<ProtectedRoute><Jobs /></ProtectedRoute>} />
           <Route path="/ats-analyzer" element={<ProtectedRoute><ATSAnalyzer /></ProtectedRoute>} />
