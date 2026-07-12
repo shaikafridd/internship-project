@@ -236,49 +236,180 @@ const Profile = () => {
             </div>
           ) : (
             <div className="profile-about-blocks-container animate-slide-up">
-              {/* About Me block */}
-              <div className="info-block-card glass-panel">
-                <div className="title-row">
-                  <h3>About Me</h3>
-                  <button className="btn-edit-inline" onClick={() => setIsEditing(true)}>Edit</button>
-                </div>
-                <p className="bio-text">{aboutMe}</p>
-              </div>
+              {activeTab === 'About' && (
+                <>
+                  {/* About Me block */}
+                  <div className="info-block-card glass-panel">
+                    <div className="title-row">
+                      <h3>About Me</h3>
+                      <button className="btn-edit-inline" onClick={() => setIsEditing(true)}>Edit</button>
+                    </div>
+                    <p className="bio-text">{aboutMe}</p>
+                  </div>
 
-              {/* Personal Information */}
-              <div className="info-block-card glass-panel" style={{ marginTop: '24px' }}>
-                <div className="title-row">
-                  <h3>Personal Information</h3>
-                  <button className="btn-edit-inline" onClick={() => setIsEditing(true)}>Edit</button>
-                </div>
+                  {/* Personal Information */}
+                  <div className="info-block-card glass-panel" style={{ marginTop: '24px' }}>
+                    <div className="title-row">
+                      <h3>Personal Information</h3>
+                      <button className="btn-edit-inline" onClick={() => setIsEditing(true)}>Edit</button>
+                    </div>
 
-                <div className="personal-info-grid">
-                  <div className="info-item">
-                    <span>Full Name</span>
-                    <p>{name}</p>
+                    <div className="personal-info-grid">
+                      <div className="info-item">
+                        <span>Full Name</span>
+                        <p>{name}</p>
+                      </div>
+                      <div className="info-item">
+                        <span>Date of Birth</span>
+                        <p>{dob ? new Date(dob).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }) : '15 May 2002'}</p>
+                      </div>
+                      <div className="info-item">
+                        <span>Gender</span>
+                        <p>{gender || 'Male'}</p>
+                      </div>
+                      <div className="info-item">
+                        <span>Location</span>
+                        <p>{location || 'Hyderabad, India'}</p>
+                      </div>
+                      <div className="info-item">
+                        <span>Phone</span>
+                        <p>{phone || '+91 98765 43210'}</p>
+                      </div>
+                      <div className="info-item">
+                        <span>Email</span>
+                        <p>{email}</p>
+                      </div>
+                    </div>
                   </div>
-                  <div className="info-item">
-                    <span>Date of Birth</span>
-                    <p>{dob ? new Date(dob).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }) : '15 May 2002'}</p>
+                </>
+              )}
+
+              {activeTab === 'Education' && (
+                <div className="info-block-card glass-panel">
+                  <div className="title-row">
+                    <h3>Education History</h3>
+                    <button className="btn-edit-inline" onClick={() => setIsEditing(true)}>Edit</button>
                   </div>
-                  <div className="info-item">
-                    <span>Gender</span>
-                    <p>{gender || 'Male'}</p>
-                  </div>
-                  <div className="info-item">
-                    <span>Location</span>
-                    <p>{location || 'Hyderabad, India'}</p>
-                  </div>
-                  <div className="info-item">
-                    <span>Phone</span>
-                    <p>{phone || '+91 98765 43210'}</p>
-                  </div>
-                  <div className="info-item">
-                    <span>Email</span>
-                    <p>{email}</p>
+                  
+                  <div className="timeline-list-block">
+                    <div className="timeline-card-item">
+                      <div className="badge-marker">🎓</div>
+                      <div className="timeline-card-details">
+                        <h4>Bachelor of Technology in Computer Science</h4>
+                        <p className="sub">Hyderabad Institute of Technology • 2020 - 2024</p>
+                        <span className="grade-badge">Grade: 8.5 CGPA</span>
+                      </div>
+                    </div>
+
+                    <div className="timeline-card-item" style={{ marginTop: '20px' }}>
+                      <div className="badge-marker">🏫</div>
+                      <div className="timeline-card-details">
+                        <h4>Senior Secondary Certificate (Class XII)</h4>
+                        <p className="sub">Alpha Junior College • 2018 - 2020</p>
+                        <span className="grade-badge">Grade: 93%</span>
+                      </div>
+                    </div>
+
+                    <div className="timeline-card-item" style={{ marginTop: '20px' }}>
+                      <div className="badge-marker">🏫</div>
+                      <div className="timeline-card-details">
+                        <h4>Secondary School Certificate (Class X)</h4>
+                        <p className="sub">St. Pauls High School • Completed 2018</p>
+                        <span className="grade-badge">Grade: 9.2 GPA</span>
+                      </div>
+                    </div>
                   </div>
                 </div>
-              </div>
+              )}
+
+              {activeTab === 'Experience' && (
+                <div className="info-block-card glass-panel">
+                  <div className="title-row">
+                    <h3>Work Experience</h3>
+                    <button className="btn-edit-inline" onClick={() => setIsEditing(true)}>Edit</button>
+                  </div>
+
+                  <div className="timeline-list-block">
+                    <div className="timeline-card-item">
+                      <div className="badge-marker">💼</div>
+                      <div className="timeline-card-details">
+                        <h4>Frontend Web Developer Intern</h4>
+                        <p className="sub">TechNova Solutions • Jan 2024 - Present</p>
+                        <p className="desc-text" style={{ fontSize: '0.8rem', color: 'hsl(var(--text-secondary))', marginTop: '6px', lineHeight: '1.4' }}>
+                          Building responsive React.js dashboards, integrating REST API middlewares, HSL css design tokens, and CSS layout grids.
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="timeline-card-item" style={{ marginTop: '20px' }}>
+                      <div className="badge-marker">💼</div>
+                      <div className="timeline-card-details">
+                        <h4>Web Design Intern</h4>
+                        <p className="sub">PixelPerfect Agency • May 2023 - Jul 2023</p>
+                        <p className="desc-text" style={{ fontSize: '0.8rem', color: 'hsl(var(--text-secondary))', marginTop: '6px', lineHeight: '1.4' }}>
+                          Designed UX wireframes in Figma and coded semantic HTML5/CSS3 prototype landing screens.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {activeTab === 'Skills' && (
+                <div className="info-block-card glass-panel">
+                  <div className="title-row">
+                    <h3>Detailed Skills Matrix</h3>
+                    <button className="btn-edit-inline" onClick={() => setIsEditing(true)}>Edit</button>
+                  </div>
+
+                  <div className="skills-bars-grid" style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                    {[
+                      { name: 'HTML & CSS', value: 95 },
+                      { name: 'JavaScript', value: 90 },
+                      { name: 'React JS', value: 85 },
+                      { name: 'Node.js & Express', value: 75 },
+                      { name: 'Tailwind CSS & Git', value: 80 },
+                      { name: 'Figma UI Design', value: 85 }
+                    ].map((s, idx) => (
+                      <div key={idx} className="skill-progress-row">
+                        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', fontWeight: 600, marginBottom: '4px' }}>
+                          <span>{s.name}</span>
+                          <span>{s.value}%</span>
+                        </div>
+                        <div className="progress-container" style={{ height: '8px', background: '#f1f5f9' }}>
+                          <div className="progress-bar" style={{ width: `${s.value}%` }}></div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {activeTab === 'Resume' && (
+                <div className="info-block-card glass-panel">
+                  <div className="title-row">
+                    <h3>My Resume</h3>
+                    <button className="btn-edit-inline" onClick={() => setIsEditing(true)}>Edit</button>
+                  </div>
+
+                  <div className="resume-details-box">
+                    <div className="resume-file-card" style={{ display: 'flex', alignItems: 'center', gap: '16px', padding: '16px', backgroundColor: '#f8fafc', borderRadius: '8px', border: '1px solid hsl(var(--border-color))' }}>
+                      <span style={{ fontSize: '2rem' }}>📄</span>
+                      <div style={{ flex: 1 }}>
+                        <h4 style={{ fontSize: '0.9rem' }}>Arshad_Khan_Resume.pdf</h4>
+                        <span style={{ fontSize: '0.75rem', color: 'hsl(var(--text-muted))', fontWeight: 600 }}>Size: 245 KB • Uploaded Jan 20, 2024</span>
+                      </div>
+                      <button className="btn btn-primary" style={{ padding: '6px 12px', fontSize: '0.75rem' }}>Download</button>
+                    </div>
+
+                    <div className="resume-upload-dropzone" style={{ marginTop: '24px', border: '2px dashed hsl(var(--border-color))', borderRadius: '8px', padding: '30px 20px', textAlign: 'center', cursor: 'pointer' }}>
+                      <span style={{ fontSize: '1.8rem', display: 'block', marginBottom: '8px' }}>📤</span>
+                      <p style={{ fontSize: '0.8rem', fontWeight: 600 }}>Upload New Resume</p>
+                      <span style={{ fontSize: '0.75rem', color: 'hsl(var(--text-muted))' }}>Drag and drop a PDF file here (Max 5MB)</span>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
           )}
 
@@ -658,6 +789,57 @@ const Profile = () => {
           font-size: 0.75rem;
           color: hsl(var(--text-muted));
           font-weight: 500;
+        }
+
+        .timeline-list-block {
+          display: flex;
+          flex-direction: column;
+          gap: 20px;
+        }
+
+        .timeline-card-item {
+          display: flex;
+          gap: 16px;
+          align-items: flex-start;
+        }
+
+        .badge-marker {
+          width: 36px;
+          height: 36px;
+          border-radius: 50%;
+          background-color: #f1f5f9;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 1.1rem;
+          flex-shrink: 0;
+          border: 1px solid hsl(var(--border-color));
+        }
+
+        .timeline-card-details h4 {
+          font-size: 0.95rem;
+          margin-bottom: 2px;
+        }
+
+        .timeline-card-details .sub {
+          font-size: 0.75rem;
+          color: hsl(var(--text-muted));
+          font-weight: 600;
+          margin-bottom: 6px;
+        }
+
+        .grade-badge {
+          display: inline-block;
+          font-size: 0.7rem;
+          font-weight: 700;
+          color: hsl(var(--primary));
+          background-color: hsl(var(--primary) / 0.08);
+          padding: 2px 8px;
+          border-radius: 4px;
+        }
+
+        .skill-progress-row {
+          width: 100%;
         }
 
         @media (max-width: 992px) {
