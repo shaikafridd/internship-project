@@ -2,7 +2,7 @@ import axios from 'axios';
 
 // ─── Regular User API Instance ────────────────────────────────────────────────
 const api = axios.create({
-  baseURL: '/api',
+  baseURL: import.meta.env.VITE_API_BASE_URL || '/api',
   headers: {
     'Content-Type': 'application/json',
   },
@@ -10,7 +10,7 @@ const api = axios.create({
 
 // ─── Admin API Instance (uses admin_token) ────────────────────────────────────
 const adminApi = axios.create({
-  baseURL: '/api',
+  baseURL: import.meta.env.VITE_API_BASE_URL || '/api',
   headers: {
     'Content-Type': 'application/json',
   },
