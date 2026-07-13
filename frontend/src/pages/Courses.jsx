@@ -109,9 +109,39 @@ const Courses = () => {
               style={{ animationDelay: `${idx * 0.05}s` }}
               onClick={() => navigate(`/courses/${course._id}`)}
             >
-              <div className="course-card-header">
-                <span className="badge badge-secondary">{course.category}</span>
-                <span className="course-duration">{course.duration}</span>
+              <div className="course-card-cover" style={{
+                height: '110px',
+                background: course.category === 'Development' ? 'linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%)' :
+                            course.category === 'Design' ? 'linear-gradient(135deg, #4f46e5 0%, #ec4899 100%)' :
+                            'linear-gradient(135deg, #0f172a 0%, #3a3b45 100%)',
+                margin: '-24px -24px 16px -24px',
+                borderTopLeftRadius: 'calc(var(--radius-md) - 1px)',
+                borderTopRightRadius: 'calc(var(--radius-md) - 1px)',
+                display: 'flex',
+                flexDirection: 'column',
+                justifyContent: 'space-between',
+                padding: '16px',
+                color: 'white',
+                position: 'relative',
+                overflow: 'hidden'
+              }}>
+                {/* Background decorative graphic */}
+                <div style={{ position: 'absolute', right: '-10px', bottom: '-20px', fontSize: '4.5rem', opacity: 0.15, fontWeight: 900, userSelect: 'none' }}>
+                  {course.category === 'Development' ? 'JS' : course.category === 'Design' ? 'UI' : '☁️'}
+                </div>
+
+                <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%', alignItems: 'center', zIndex: 1 }}>
+                  <span className="badge badge-secondary" style={{ backgroundColor: 'rgba(255,255,255,0.2)', backdropFilter: 'blur(4px)', color: 'white', border: '1px solid rgba(255,255,255,0.3)', padding: '3px 8px' }}>
+                    {course.category}
+                  </span>
+                  <span className="course-duration" style={{ color: 'rgba(255,255,255,0.95)', fontSize: '0.75rem', fontWeight: 600 }}>
+                    {course.duration}
+                  </span>
+                </div>
+
+                <div style={{ zIndex: 1, fontSize: '1.15rem', fontWeight: 800, textShadow: '0 2px 4px rgba(0,0,0,0.1)' }}>
+                  {course.category === 'Development' ? 'JS Development' : course.category === 'Design' ? 'UI/UX Design' : 'Cloud Computing'}
+                </div>
               </div>
 
               <div className="course-card-body">
@@ -122,7 +152,7 @@ const Courses = () => {
 
               <div className="course-card-footer">
                 <div className="lessons-indicator">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" style={{ color: 'hsl(var(--primary))' }}>
                     <polygon points="5 3 19 12 5 21 5 3" />
                   </svg>
                   <span>{course.lessonsCount} lessons</span>
@@ -182,7 +212,7 @@ const Courses = () => {
           width: 100%;
           background-color: hsl(var(--bg-dark));
           border: 1px solid hsl(var(--border-color));
-          color: white;
+          color: hsl(var(--text-primary));
           padding: 12px 16px 12px 42px;
           font-size: 0.95rem;
           border-radius: var(--radius-sm);
@@ -214,8 +244,8 @@ const Courses = () => {
         }
 
         .category-tab-btn:hover {
-          color: white;
-          background-color: hsl(var(--bg-card));
+          color: hsl(var(--text-primary));
+          background-color: hsl(var(--bg-dark));
           border-color: hsl(var(--text-muted));
         }
 
@@ -239,14 +269,17 @@ const Courses = () => {
           flex-direction: column;
           padding: 24px;
           min-height: 250px;
+          background-color: #ffffff;
+          border: 1px solid hsl(var(--border-color));
+          border-radius: var(--radius-md);
           transition: var(--transition-normal);
         }
 
         .course-card:hover {
           transform: translateY(-5px);
           border-color: hsl(var(--primary));
-          box-shadow: 0 10px 25px var(--primary-glow);
-          background-color: hsl(var(--bg-card-hover));
+          box-shadow: 0 10px 25px rgba(37, 99, 235, 0.08);
+          background-color: #ffffff;
         }
 
         .course-card-header {
@@ -268,21 +301,21 @@ const Courses = () => {
         }
 
         .course-card-body h3 {
-          font-size: 1.3rem;
-          line-height: 1.3;
+          font-size: 1.2rem;
+          line-height: 1.35;
           margin-bottom: 6px;
-          color: white;
+          color: hsl(var(--text-primary));
         }
 
         .instructor-name {
           font-size: 0.85rem;
-          color: hsl(var(--secondary));
+          color: hsl(var(--primary));
           font-weight: 600;
           margin-bottom: 12px;
         }
 
         .course-desc {
-          font-size: 0.9rem;
+          font-size: 0.85rem;
           color: hsl(var(--text-secondary));
           line-height: 1.5;
           display: -webkit-box;
@@ -305,13 +338,13 @@ const Courses = () => {
           gap: 6px;
           color: hsl(var(--text-secondary));
           font-size: 0.85rem;
-          font-weight: 500;
+          font-weight: 600;
         }
 
         .price-tag {
           display: flex;
           align-items: baseline;
-          color: white;
+          color: hsl(var(--text-primary));
         }
 
         .price-tag .currency {
@@ -322,7 +355,7 @@ const Courses = () => {
 
         .price-tag .amount {
           font-family: var(--font-title);
-          font-size: 1.4rem;
+          font-size: 1.35rem;
           font-weight: 800;
         }
 

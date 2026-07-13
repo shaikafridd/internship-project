@@ -197,8 +197,37 @@ const Dashboard = () => {
                 { _id: '4', title: 'Figma UI Design', category: 'Design', rating: '4.5', level: 'Beginner' }
               ]).map((course) => (
                 <div key={course._id} className="rec-course-item glass-panel" onClick={() => navigate(course._id.length > 5 ? `/courses/${course._id}` : '/courses')}>
-                  <div className="item-thumbnail">
-                    <span>{course.category === 'Development' ? 'JS' : course.category === 'Design' ? 'FIGMA' : 'AWS'}</span>
+                  <div className="item-thumbnail" style={{ backgroundColor: '#0f172a', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    {course.title.toLowerCase().includes('javascript') && (
+                      <div style={{ backgroundColor: '#f7df1e', color: '#000000', width: '40px', height: '40px', borderRadius: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: '800', fontSize: '1.25rem', fontFamily: 'var(--font-title)' }}>JS</div>
+                    )}
+                    {course.title.toLowerCase().includes('react') && (
+                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="-11.5 -10.23174 23 20.46348" width="40" height="40">
+                        <circle cx="0" cy="0" r="2.05" fill="#61dafb"/>
+                        <g stroke="#61dafb" strokeWidth="1" fill="none">
+                          <ellipse rx="11" ry="4.2"/>
+                          <ellipse rx="11" ry="4.2" transform="rotate(60)"/>
+                          <ellipse rx="11" ry="4.2" transform="rotate(120)"/>
+                        </g>
+                      </svg>
+                    )}
+                    {course.title.toLowerCase().includes('aws') && (
+                      <span style={{ color: '#ffffff', fontWeight: '800', fontSize: '1.4rem', fontFamily: 'var(--font-title)', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                        <span style={{ fontSize: '1.1rem', lineHeight: '0.8' }}>aws</span>
+                      </span>
+                    )}
+                    {course.title.toLowerCase().includes('figma') && (
+                      <svg width="24" height="36" viewBox="0 0 32 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M8 0C3.58 0 0 3.58 0 8C0 12.42 3.58 16 8 16H16V0H8Z" fill="#F24E1E"/>
+                        <path d="M24 0C19.58 0 16 3.58 16 8V16H24C28.42 16 32 12.42 32 8C32 3.58 28.42 0 24 0Z" fill="#FF7262"/>
+                        <path d="M16 16V32H24C28.42 32 32 28.42 32 24C32 19.58 28.42 16 24 16H16Z" fill="#1ABCFE"/>
+                        <path d="M8 32C3.58 32 0 35.58 0 40C0 44.42 3.58 48 8 48C12.42 48 16 44.42 16 40V32H8Z" fill="#0ACF83"/>
+                        <path d="M0 24C0 19.58 3.58 16 8 16H16V32H8C3.58 32 0 28.42 0 24Z" fill="#A259FF"/>
+                      </svg>
+                    )}
+                    {!['javascript', 'react', 'aws', 'figma'].some(k => course.title.toLowerCase().includes(k)) && (
+                      <span style={{ color: '#ffffff', fontWeight: '800' }}>{course.category}</span>
+                    )}
                   </div>
                   <div className="item-summary">
                     <span className="category-label">{course.category}</span>

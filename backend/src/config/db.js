@@ -134,6 +134,10 @@ const seedInMemoryDB = async () => {
       aboutMe: 'Passionate web developer with a strong interest in building clean, user-friendly web applications. I love learning new technologies and solving real-world problems.',
       skills: ['HTML', 'CSS', 'JavaScript', 'React', 'Node.js', 'Tailwind CSS', 'Git & GitHub', 'Figma'],
       photoUrl: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=200',
+      atsTopMatch: {
+        role: 'Web Developer',
+        score: 85
+      },
       achievements: [
         { title: 'Python Certificate - Completed Python for Beginners', date: new Date('2024-05-10') },
         { title: 'UI/UX Design Course - Completed UI/UX Design Basics', date: new Date('2024-04-20') },

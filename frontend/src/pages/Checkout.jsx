@@ -496,6 +496,72 @@ const Checkout = () => {
       </div>
 
       <style>{`
+        .checkout-wrapper {
+          display: flex;
+          flex-direction: column;
+          gap: 20px;
+        }
+
+        .checkout-grid {
+          display: grid;
+          grid-template-columns: 380px 1fr;
+          gap: 24px;
+          align-items: start;
+        }
+
+        @media (max-width: 992px) {
+          .checkout-grid {
+            grid-template-columns: 1fr;
+          }
+        }
+
+        .summary-column {
+          padding: 24px;
+        }
+
+        .summary-column h3 {
+          font-size: 1.15rem;
+          margin-bottom: 4px;
+        }
+
+        .summary-column .subtitle {
+          font-size: 0.8rem;
+          color: hsl(var(--text-muted));
+          margin-bottom: 20px;
+        }
+
+        .invoice-prices {
+          display: flex;
+          flex-direction: column;
+          gap: 12px;
+          border-top: 1px solid hsl(var(--border-color));
+          padding-top: 16px;
+          margin-top: 16px;
+        }
+
+        .price-row {
+          display: flex;
+          justify-content: space-between;
+          font-size: 0.85rem;
+          color: hsl(var(--text-secondary));
+          font-weight: 500;
+        }
+
+        .price-row.green-row {
+          color: hsl(var(--accent-green));
+          font-weight: 600;
+        }
+
+        .price-row.total-row {
+          font-family: var(--font-title);
+          font-size: 1.1rem;
+          font-weight: 800;
+          color: hsl(var(--text-primary));
+          border-top: 1px solid hsl(var(--border-color));
+          padding-top: 12px;
+          margin-top: 4px;
+        }
+
         /* Security Header */
         .checkout-top-header {
           display: flex;

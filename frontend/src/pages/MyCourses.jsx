@@ -166,13 +166,6 @@ const MyCourses = () => {
   return (
     <div className="course-player-wrapper animate-fade-in">
       
-      {/* Breadcrumb row */}
-      <div className="course-breadcrumb">
-        <Link to="/courses">&larr; My Courses</Link>
-        <span>&gt;</span>
-        <span className="current">{course?.title || 'UI/UX Design Fundamentals'}</span>
-      </div>
-
       {/* Main Grids */}
       <div className="player-grid">
         

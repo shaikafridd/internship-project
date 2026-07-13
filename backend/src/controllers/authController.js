@@ -19,6 +19,7 @@ const sendTokenResponse = (user, statusCode, res) => {
       resumeUploaded: user.resumeUploaded || false,
       atsTopMatch: user.atsTopMatch,
       atsSkills: user.atsSkills || [],
+      role: user.role,
     },
   });
 };
