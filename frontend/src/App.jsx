@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import ErrorBoundary from './components/ErrorBoundary';
@@ -28,13 +28,72 @@ import AdminLogin from './pages/AdminLogin';
 import AdminDashboard from './pages/AdminDashboard';
 
 const AppContent = () => {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, loading } = useAuth();
   const location = useLocation();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [percent, setPercent] = useState(0);
+
+  useEffect(() => {
+    if (!loading) return;
+    const interval = setInterval(() => {
+      setPercent((prev) => {
+        if (prev >= 95) {
+          clearInterval(interval);
+          return 95;
+        }
+        return prev + 1;
+      });
+    }, 450);
+    return () => clearInterval(interval);
+  }, [loading]);
 
   const toggleSidebar = () => {
     setSidebarOpen(!sidebarOpen);
   };
+
+  if (loading) {
+    return (
+      <div className="wakeup-container" style={{
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        height: '100vh',
+        width: '100vw',
+        background: '#0f172a',
+        color: 'white',
+        fontFamily: 'system-ui, sans-serif'
+      }}>
+        <div style={{ maxWidth: '400px', width: '90%', textAlign: 'center' }}>
+          <div style={{ fontSize: '3rem', marginBottom: '20px' }}>⚡</div>
+          <h2 style={{ fontSize: '1.5rem', fontWeight: 800, marginBottom: '10px' }}>Connecting to Server</h2>
+          <p style={{ color: '#94a3b8', fontSize: '0.85rem', marginBottom: '30px', lineHeight: 1.5 }}>
+            Waking up the hosting service (Render cold start). This may take up to 45 seconds on the first load...
+          </p>
+          <div style={{
+            height: '6px',
+            width: '100%',
+            background: 'rgba(255,255,255,0.08)',
+            borderRadius: '10px',
+            overflow: 'hidden',
+            marginBottom: '10px'
+          }}>
+            <div style={{
+              height: '100%',
+              width: `${percent}%`,
+              background: '#2563eb',
+              borderRadius: '10px',
+              transition: 'width 0.3s ease'
+            }}></div>
+          </div>
+          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem', color: '#64748b', fontWeight: 600 }}>
+            <span>{percent}% Waking Up</span>
+            <span>Est. ~45s</span>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   // Paths that do not show sidebar and navbar (Landing and Auth pages)
   const noLayoutPaths = ['/', '/login', '/signup', '/admin/login'];
