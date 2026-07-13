@@ -1,4 +1,5 @@
 const express = require('express');
+const cors = require('cors');
 const dotenv = require('dotenv');
 const connectDB = require('./src/config/db');
 const authRoutes = require('./src/routes/authRoutes');
@@ -21,6 +22,9 @@ connectDB().then(() => {
 });
 
 const app = express();
+
+// Enable Cross-Origin Resource Sharing (CORS) for production requests
+app.use(cors());
 
 // Body parser
 app.use(express.json());

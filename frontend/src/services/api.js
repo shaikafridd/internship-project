@@ -1,8 +1,17 @@
 import axios from 'axios';
 
+// Automatically format API baseURL to guarantee it ends with '/api'
+const getBaseUrl = () => {
+  const envUrl = import.meta.env.VITE_API_BASE_URL;
+  if (!envUrl) return '/api';
+  return envUrl.endsWith('/api') ? envUrl : (envUrl.endsWith('/') ? `${envUrl}api` : `${envUrl}/api`);
+};
+
+const apiBaseUrl = getBaseUrl();
+
 // ─── Regular User API Instance ────────────────────────────────────────────────
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL || '/api',
+  baseURL: apiBaseUrl,
   headers: {
     'Content-Type': 'application/json',
   },
@@ -10,7 +19,7 @@ const api = axios.create({
 
 // ─── Admin API Instance (uses admin_token) ────────────────────────────────────
 const adminApi = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL || '/api',
+  baseURL: apiBaseUrl,
   headers: {
     'Content-Type': 'application/json',
   },
