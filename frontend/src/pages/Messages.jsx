@@ -1,11 +1,13 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 
 const Messages = () => {
   const { user } = useAuth();
   const firstName = user?.name?.split(' ')[0] || 'User';
   const [activeChatId, setActiveChatId] = useState('1');
-  const chats = [
+  const [msgText, setMsgText] = useState('');
+
+  const initialChats = [
     {
       id: '1',
       sender: 'Sarah Jenkins (TechNova)',
@@ -43,18 +45,37 @@ const Messages = () => {
     }
   ];
 
+  const [chats, setChats] = useState(initialChats);
+
+  useEffect(() => {
+    setChats(initialChats);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user]);
+
   const activeChat = chats.find(c => c.id === activeChatId) || chats[0];
-  const [msgText, setMsgText] = useState('');
 
   const handleSend = (e) => {
     e.preventDefault();
     if (!msgText.trim()) return;
-    activeChat.messages.push({
-      id: Math.random().toString(),
-      sender: 'Me',
-      text: msgText.trim(),
-      time: 'Just Now'
-    });
+
+    setChats(prev => prev.map(chat => {
+      if (chat.id === activeChatId) {
+        return {
+          ...chat,
+          messages: [
+            ...chat.messages,
+            {
+              id: Math.random().toString(),
+              sender: 'Me',
+              text: msgText.trim(),
+              time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+            }
+          ]
+        };
+      }
+      return chat;
+    }));
+
     setMsgText('');
   };
 

@@ -1,5 +1,5 @@
 const User = require('../models/User');
-const { PDFParse } = require('pdf-parse');
+const pdfParse = require('pdf-parse');
 const axios = require('axios');
 const FormData = require('form-data');
 
@@ -302,8 +302,7 @@ exports.analyzeResume = async (req, res, next) => {
     // 1. Parse PDF text
     let pdfText = '';
     try {
-      const parser = new PDFParse({ data: req.file.buffer });
-      const parsedPdf = await parser.getText();
+      const parsedPdf = await pdfParse(req.file.buffer);
       pdfText = parsedPdf.text || '';
     } catch (parseErr) {
       console.error('PDF parsing failed:', parseErr.message);
