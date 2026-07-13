@@ -680,14 +680,14 @@ const AdminDashboard = () => {
           background-color: #f8fafc;
         }
 
-        /* Sidebar styling */
+        /* Sidebar styling matches student portal style */
         .admin-sidebar {
           width: 260px;
-          background-color: #0b0d19;
-          color: rgba(255,255,255,0.7);
+          background-color: #ffffff;
+          color: hsl(var(--text-secondary));
           display: flex;
           flex-direction: column;
-          border-right: 1px solid rgba(255,255,255,0.05);
+          border-right: 1px solid hsl(var(--border-color));
           position: fixed;
           top: 0; bottom: 0; left: 0;
           z-index: 10;
@@ -698,13 +698,13 @@ const AdminDashboard = () => {
           align-items: center;
           gap: 12px;
           padding: 24px 20px;
-          border-bottom: 1px solid rgba(255,255,255,0.05);
+          border-bottom: 1px solid hsl(var(--border-color));
         }
 
         .logo-icon-blue {
           width: 32px;
           height: 32px;
-          background-color: #2563eb;
+          background-color: hsl(var(--primary));
           border-radius: 6px;
           color: white;
           display: flex;
@@ -713,7 +713,7 @@ const AdminDashboard = () => {
         }
 
         .brand-text h3 {
-          color: white;
+          color: hsl(var(--text-primary));
           font-size: 1.15rem;
           font-weight: 800;
           line-height: 1.1;
@@ -721,7 +721,7 @@ const AdminDashboard = () => {
 
         .brand-text span {
           font-size: 0.75rem;
-          color: #3b82f6;
+          color: hsl(var(--primary));
           font-weight: 700;
           text-transform: uppercase;
           letter-spacing: 0.05em;
@@ -739,7 +739,7 @@ const AdminDashboard = () => {
         .nav-section-title {
           font-size: 0.7rem;
           font-weight: 800;
-          color: rgba(255,255,255,0.3);
+          color: hsl(var(--text-muted));
           padding: 14px 16px 6px;
           letter-spacing: 0.1em;
           text-transform: uppercase;
@@ -753,7 +753,7 @@ const AdminDashboard = () => {
           width: 100%;
           border: none;
           background: transparent;
-          color: rgba(255,255,255,0.7);
+          color: hsl(var(--text-secondary));
           text-align: left;
           border-radius: var(--radius-sm);
           font-size: 0.85rem;
@@ -763,30 +763,31 @@ const AdminDashboard = () => {
         }
 
         .admin-nav-link:hover {
-          color: white;
-          background-color: rgba(255,255,255,0.03);
+          color: hsl(var(--text-primary));
+          background-color: hsl(var(--bg-dark));
         }
 
         .admin-nav-link.active {
-          color: white;
-          background-color: #2563eb;
+          color: hsl(var(--primary));
+          background-color: hsl(var(--primary) / 0.08);
+          font-weight: 700;
         }
 
         .logout-btn {
-          color: #f87171;
+          color: hsl(var(--accent-red) / 0.8);
         }
 
         .logout-btn:hover {
-          background-color: rgba(239, 68, 68, 0.1);
+          background-color: rgba(239, 68, 68, 0.05);
         }
 
         .admin-profile-footer {
           padding: 16px 20px;
-          border-top: 1px solid rgba(255,255,255,0.05);
+          border-top: 1px solid hsl(var(--border-color));
           display: flex;
           align-items: center;
           gap: 12px;
-          background-color: rgba(0,0,0,0.15);
+          background-color: #f8fafc;
         }
 
         .admin-profile-footer .admin-avatar {
@@ -794,7 +795,7 @@ const AdminDashboard = () => {
           height: 36px;
           border-radius: 50%;
           object-fit: cover;
-          border: 1.5px solid rgba(255,255,255,0.1);
+          border: 1.5px solid hsl(var(--border-color));
         }
 
         .admin-profile-footer .admin-info {
@@ -807,18 +808,18 @@ const AdminDashboard = () => {
         .admin-profile-footer .admin-info h4 {
           font-size: 0.8rem;
           font-weight: 700;
-          color: white;
+          color: hsl(var(--text-primary));
           line-height: 1.2;
         }
 
         .admin-profile-footer .admin-info span {
           font-size: 0.65rem;
-          color: rgba(255,255,255,0.4);
+          color: hsl(var(--text-secondary));
         }
 
         .down-chevron {
           font-size: 0.75rem;
-          color: rgba(255,255,255,0.3);
+          color: hsl(var(--text-muted));
         }
 
         /* Main Content pane */
