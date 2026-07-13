@@ -159,6 +159,57 @@ const Checkout = () => {
     );
   }
 
+  const renderPaymentLogo = (name) => {
+    switch (name) {
+      case 'google-pay':
+        return (
+          <span style={{ fontSize: '0.75rem', fontWeight: '800', padding: '2px 6px', borderRadius: '4px', background: '#f1f5f9', color: '#1f2937', border: '1px solid #e5e7eb' }}>GPay</span>
+        );
+      case 'phonepe':
+        return (
+          <span style={{ fontSize: '0.75rem', fontWeight: '800', padding: '2px 6px', borderRadius: '4px', background: '#5f259f', color: '#ffffff' }}>PhonePe</span>
+        );
+      case 'paytm':
+        return (
+          <span style={{ fontSize: '0.75rem', fontWeight: '800', padding: '2px 6px', borderRadius: '4px', background: '#00baf2', color: '#ffffff' }}>Paytm</span>
+        );
+      case 'bhim':
+        return (
+          <span style={{ fontSize: '0.75rem', fontWeight: '800', padding: '2px 6px', borderRadius: '4px', background: '#e5f3ff', color: '#1e3a8a', border: '1px solid #b3d7ff' }}>BHIM</span>
+        );
+      case 'visa':
+        return (
+          <span style={{ fontSize: '0.75rem', fontWeight: 'bold', fontStyle: 'italic', padding: '2px 6px', borderRadius: '4px', background: '#1a1f71', color: '#ffffff' }}>VISA</span>
+        );
+      case 'mastercard':
+        return (
+          <div style={{ display: 'flex', alignItems: 'center', gap: '3px', background: '#111827', padding: '2px 6px', borderRadius: '4px' }}>
+            <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#eb001b', display: 'inline-block' }}></span>
+            <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#ff5f00', display: 'inline-block' }}></span>
+            <span style={{ fontSize: '0.65rem', fontWeight: '800', color: '#ffffff' }}>MC</span>
+          </div>
+        );
+      case 'rupay':
+        return (
+          <span style={{ fontSize: '0.75rem', fontWeight: '800', padding: '2px 6px', borderRadius: '4px', background: '#f8fafc', color: '#0284c7', border: '1px solid #e2e8f0' }}>RuPay</span>
+        );
+      case 'amazon-pay':
+        return (
+          <span style={{ fontSize: '0.75rem', fontWeight: '800', padding: '2px 6px', borderRadius: '4px', background: '#ff9900', color: '#111111' }}>Amazon Pay</span>
+        );
+      case 'zest':
+        return (
+          <span style={{ fontSize: '0.75rem', fontWeight: '800', padding: '2px 6px', borderRadius: '4px', background: '#10b981', color: '#ffffff' }}>Zest</span>
+        );
+      case 'simpl':
+        return (
+          <span style={{ fontSize: '0.75rem', fontWeight: '800', padding: '2px 6px', borderRadius: '4px', background: '#3b82f6', color: '#ffffff' }}>Simpl</span>
+        );
+      default:
+        return null;
+    }
+  };
+
   // Payment methods list corresponding to screenshot
   const paymentMethods = [
     {
@@ -166,12 +217,7 @@ const Checkout = () => {
       tab: 'UPI',
       title: 'UPI (Recommended)',
       desc: 'Pay using any UPI app',
-      logos: [
-        'https://www.svgrepo.com/show/503046/google-pay.svg',
-        'https://www.svgrepo.com/show/368897/phonepe.svg',
-        'https://www.svgrepo.com/show/354173/paytm.svg',
-        'https://www.svgrepo.com/show/448259/bhim.svg'
-      ],
+      logos: ['google-pay', 'phonepe', 'paytm', 'bhim'],
       fields: (
         <div className="card-form animate-fade-in" style={{ padding: 0, marginTop: '14px' }}>
           <div className="form-group" style={{ marginBottom: 0 }}>
@@ -186,11 +232,7 @@ const Checkout = () => {
       tab: 'Cards',
       title: 'Credit / Debit Card',
       desc: 'Visa, Mastercard, RuPay & more',
-      logos: [
-        'https://www.svgrepo.com/show/508722/visa.svg',
-        'https://www.svgrepo.com/show/508699/mastercard.svg',
-        'https://www.svgrepo.com/show/476251/rupay.svg'
-      ],
+      logos: ['visa', 'mastercard', 'rupay'],
       fields: (
         <div className="card-form animate-fade-in" style={{ padding: 0, marginTop: '14px' }}>
           <div className="form-group">
@@ -233,11 +275,7 @@ const Checkout = () => {
       tab: 'Wallets',
       title: 'Wallets',
       desc: 'Paytm, PhonePe, Amazon Pay & more',
-      logos: [
-        'https://www.svgrepo.com/show/354173/paytm.svg',
-        'https://www.svgrepo.com/show/368897/phonepe.svg',
-        'https://www.svgrepo.com/show/353391/amazon-pay.svg'
-      ],
+      logos: ['paytm', 'phonepe', 'amazon-pay'],
       fields: <p style={{ fontSize: '0.85rem', color: 'hsl(var(--text-secondary))' }}>You will be redirected to your wallet provider.</p>
     },
     {
@@ -245,10 +283,7 @@ const Checkout = () => {
       tab: 'EMI',
       title: 'EMI / Buy Now Pay Later',
       desc: 'Easy EMI options available',
-      logos: [
-        'https://www.svgrepo.com/show/354593/zest.svg',
-        'https://www.svgrepo.com/show/476313/simpl.svg'
-      ],
+      logos: ['zest', 'simpl'],
       fields: <p style={{ fontSize: '0.85rem', color: 'hsl(var(--text-secondary))' }}>Choose EMI provider on next screen.</p>
     }
   ];
@@ -412,13 +447,15 @@ const Checkout = () => {
                               </div>
                             </div>
 
-                            {method.logos?.length > 0 && (
-                              <div className="payment-brand-logos">
-                                {method.logos.map((logo, idx) => (
-                                  <img key={idx} src={logo} alt="brand" className="payment-brand-logo" />
-                                ))}
-                              </div>
-                            )}
+                             {method.logos?.length > 0 && (
+                               <div className="payment-brand-logos" style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
+                                 {method.logos.map((logoName, idx) => (
+                                   <React.Fragment key={idx}>
+                                     {renderPaymentLogo(logoName)}
+                                   </React.Fragment>
+                                 ))}
+                               </div>
+                             )}
                           </button>
 
                           {isExpanded && (

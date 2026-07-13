@@ -10,6 +10,38 @@ const Navbar = ({ toggleSidebar }) => {
   const isCourseView = location.pathname.startsWith('/my-courses');
   const isProfileView = location.pathname.startsWith('/profile');
 
+  const [searchQuery, setSearchQuery] = React.useState('');
+
+  React.useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    setSearchQuery(params.get('search') || '');
+  }, [location.search]);
+
+  const handleSearchChange = (e) => {
+    const val = e.target.value;
+    setSearchQuery(val);
+    
+    // Auto-update URL in real-time if we are on courses or jobs pages
+    const isCourses = location.pathname.startsWith('/courses');
+    const isJobs = location.pathname.startsWith('/jobs');
+    if (isCourses || isJobs) {
+      const targetPage = isJobs ? '/jobs' : '/courses';
+      if (val) {
+        navigate(`${targetPage}?search=${encodeURIComponent(val)}`, { replace: true });
+      } else {
+        navigate(targetPage, { replace: true });
+      }
+    }
+  };
+
+  const handleSearchKeyDown = (e) => {
+    if (e.key === 'Enter') {
+      const isJobs = location.pathname.startsWith('/jobs');
+      const targetPage = isJobs ? '/jobs' : '/courses';
+      navigate(`${targetPage}?search=${encodeURIComponent(searchQuery)}`);
+    }
+  };
+
   return (
     <header className="navbar">
       <div className="navbar-left">
@@ -28,7 +60,11 @@ const Navbar = ({ toggleSidebar }) => {
             <span className="current">UI/UX Design Fundamentals</span>
           </div>
         ) : isProfileView ? (
-          <h2 className="navbar-page-title">My Profile</h2>
+          <div className="navbar-breadcrumb">
+            <span className="back-link" onClick={() => navigate('/dashboard')}>&larr; Dashboard</span>
+            <span className="sep">&gt;</span>
+            <span className="current">My Profile</span>
+          </div>
         ) : location.pathname.startsWith('/admin') ? (
           <h2 className="navbar-page-title">Admin Dashboard</h2>
         ) : (
@@ -45,8 +81,11 @@ const Navbar = ({ toggleSidebar }) => {
             </svg>
             <input 
               type="text" 
-              placeholder={isCourseView ? "Search for courses, jobs..." : "Search for courses, jobs, skills..."} 
+              placeholder="Search for courses, jobs..." 
               className="navbar-search-input"
+              value={searchQuery}
+              onChange={handleSearchChange}
+              onKeyDown={handleSearchKeyDown}
             />
           </div>
         </div>

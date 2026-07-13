@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { jobsAPI } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 
@@ -17,10 +18,17 @@ const Jobs = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
+  const [searchParams, setSearchParams] = useSearchParams();
+  const urlSearch = searchParams.get('search') || '';
+
   // Filters
-  const [search, setSearch] = useState('');
+  const [search, setSearch] = useState(urlSearch);
   const [location, setLocation] = useState('');
   const [jobType, setJobType] = useState('');
+
+  useEffect(() => {
+    setSearch(urlSearch);
+  }, [urlSearch]);
 
   // Wizard States
   const [isWizardOpen, setIsWizardOpen] = useState(false);
@@ -41,13 +49,13 @@ const Jobs = () => {
     }
   }, [user]);
 
-  // Fetch jobs list
   const fetchJobs = async () => {
     setLoading(true);
     setError('');
     try {
       if (activeTab === 'search') {
-        const res = await jobsAPI.getJobs(search, location, jobType, false);
+        const queryTerm = urlSearch || search;
+        const res = await jobsAPI.getJobs(queryTerm, location, jobType, false);
         if (res.success && res.data) {
           setJobs(res.data);
           if (res.data.length > 0 && !selectedJob) {
@@ -91,11 +99,18 @@ const Jobs = () => {
     setSelectedJob(null);
     fetchJobs();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activeTab]);
+  }, [activeTab, urlSearch]);
 
   const handleSearchSubmit = (e) => {
     e.preventDefault();
-    fetchJobs();
+    setSearchParams(prev => {
+      if (search) {
+        prev.set('search', search);
+      } else {
+        prev.delete('search');
+      }
+      return prev;
+    });
   };
 
   const handleToggleSave = async (job, e) => {
