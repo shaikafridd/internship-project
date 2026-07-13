@@ -5,7 +5,7 @@ import { AuthProvider, useAuth } from './context/AuthContext';
 // Components
 import Sidebar from './components/Sidebar';
 import Navbar from './components/Navbar';
-import ProtectedRoute from './components/ProtectedRoute';
+import ProtectedRoute, { AdminRoute } from './components/ProtectedRoute';
 
 // Pages
 import Landing from './pages/Landing';
@@ -23,6 +23,8 @@ import Certificates from './pages/Certificates';
 import SavedJobs from './pages/SavedJobs';
 import Messages from './pages/Messages';
 import Settings from './pages/Settings';
+import AdminLogin from './pages/AdminLogin';
+import AdminDashboard from './pages/AdminDashboard';
 
 const AppContent = () => {
   const { isAuthenticated } = useAuth();
@@ -34,8 +36,9 @@ const AppContent = () => {
   };
 
   // Paths that do not show sidebar and navbar (Landing and Auth pages)
-  const noLayoutPaths = ['/', '/login', '/signup'];
-  const showLayout = isAuthenticated && !noLayoutPaths.includes(location.pathname);
+  const noLayoutPaths = ['/', '/login', '/signup', '/admin/login'];
+  const isAdminPath = location.pathname.startsWith('/admin');
+  const showLayout = isAuthenticated && !noLayoutPaths.includes(location.pathname) && !isAdminPath;
 
   return (
     <div className="app-container">
@@ -49,6 +52,11 @@ const AppContent = () => {
           <Route path="/" element={!isAuthenticated ? <Landing /> : <Navigate to="/dashboard" replace />} />
           <Route path="/login" element={!isAuthenticated ? <Login /> : <Navigate to="/dashboard" replace />} />
           <Route path="/signup" element={!isAuthenticated ? <Signup /> : <Navigate to="/dashboard" replace />} />
+
+          {/* Admin Routes */}
+          <Route path="/admin/login" element={<AdminLogin />} />
+          <Route path="/admin/dashboard" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
+          <Route path="/admin" element={<Navigate to="/admin/dashboard" replace />} />
 
           {/* Protected Portal Routes */}
           <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />

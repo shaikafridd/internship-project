@@ -21,4 +21,22 @@ const ProtectedRoute = ({ children }) => {
   return children;
 };
 
+export const AdminRoute = ({ children }) => {
+  const { isAuthenticated, loading, user } = useAuth();
+
+  if (loading) {
+    return (
+      <div className="spinner-container" style={{ height: '100vh' }}>
+        <div className="spinner"></div>
+      </div>
+    );
+  }
+
+  if (!isAuthenticated || user?.role !== 'admin') {
+    return <Navigate to="/admin/login" replace />;
+  }
+
+  return children;
+};
+
 export default ProtectedRoute;
