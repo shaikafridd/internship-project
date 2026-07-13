@@ -174,7 +174,7 @@ const Dashboard = () => {
                 </div>
                 <button 
                   className="btn btn-primary"
-                  onClick={() => navigate(`/my-courses/${continueLearning?.course?._id || '6618e7bcdeac1234567890ab'}`)}
+                  onClick={() => navigate(`/my-courses/${continueLearning?.course?._id || '6a549d77c0eced538d9303d3'}`)}
                 >
                   Continue Learning
                 </button>
