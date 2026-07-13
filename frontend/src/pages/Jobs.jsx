@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { jobsAPI } from '../services/api';
+import { useAuth } from '../context/AuthContext';
 
 const Jobs = () => {
+  const { user } = useAuth();
   // Tabs: 'search' or 'saved' or 'applied'
   const [activeTab, setActiveTab] = useState('search');
 
@@ -23,13 +25,21 @@ const Jobs = () => {
   // Wizard States
   const [isWizardOpen, setIsWizardOpen] = useState(false);
   const [wizardStep, setWizardStep] = useState(1);
-  const [resumeName, setResumeName] = useState('Arshad_Khan_Resume.pdf');
-  const [coverLetter, setCoverLetter] = useState('I am highly motivated to join your engineering team...');
+  const [resumeName, setResumeName] = useState('');
+  const [coverLetter, setCoverLetter] = useState('');
   const [noticePeriod, setNoticePeriod] = useState('Immediate');
   const [expectedSalary, setExpectedSalary] = useState('10 LPA');
   const [wizardSubmitting, setWizardSubmitting] = useState(false);
   const [wizardError, setWizardError] = useState('');
   const [wizardSuccess, setWizardSuccess] = useState(false);
+
+  useEffect(() => {
+    if (user) {
+      const sanitizedName = user.name ? user.name.replace(/\s+/g, '_') : 'User';
+      setResumeName(`${sanitizedName}_Resume.pdf`);
+      setCoverLetter(`Dear Hiring Team,\n\nI am highly motivated to join your engineering team as a ${user.atsTopMatch?.role || 'Developer'}. I have skills in ${(user.skills && user.skills.length > 0) ? user.skills.slice(0, 4).join(', ') : 'software development'}.\n\nBest regards,\n${user.name || 'Applicant'}`);
+    }
+  }, [user]);
 
   // Fetch jobs list
   const fetchJobs = async () => {
@@ -37,7 +47,15 @@ const Jobs = () => {
     setError('');
     try {
       if (activeTab === 'search') {
-        const res = await jobsAPI.getJobs(search, location, jobType);
+        const res = await jobsAPI.getJobs(search, location, jobType, false);
+        if (res.success && res.data) {
+          setJobs(res.data);
+          if (res.data.length > 0 && !selectedJob) {
+            setSelectedJob(res.data[0]);
+          }
+        }
+      } else if (activeTab === 'recommend') {
+        const res = await jobsAPI.getJobs('', '', '', true);
         if (res.success && res.data) {
           setJobs(res.data);
           if (res.data.length > 0 && !selectedJob) {
@@ -91,7 +109,7 @@ const Jobs = () => {
       const res = await jobsAPI.toggleSaveJob(job.slug, details);
       if (res.success) {
         // Toggle saved key locally
-        if (activeTab === 'search') {
+        if (activeTab === 'search' || activeTab === 'recommend') {
           setJobs(prev => prev.map(j => j.slug === job.slug ? { ...j, isSaved: res.isSaved } : j));
         }
         if (selectedJob && selectedJob.slug === job.slug) {
@@ -169,6 +187,9 @@ const Jobs = () => {
         <button className={`tab-btn ${activeTab === 'search' ? 'active' : ''}`} onClick={() => setActiveTab('search')}>
           Search Jobs
         </button>
+        <button className={`tab-btn ${activeTab === 'recommend' ? 'active' : ''}`} onClick={() => setActiveTab('recommend')}>
+          Recommended Jobs
+        </button>
         <button className={`tab-btn ${activeTab === 'saved' ? 'active' : ''}`} onClick={() => setActiveTab('saved')}>
           Saved Jobs
         </button>
@@ -235,7 +256,7 @@ const Jobs = () => {
             <p className="error-msg">{error}</p>
           ) : (
             <div className="jobs-list">
-              {activeTab === 'search' && jobs.length > 0 ? (
+              {(activeTab === 'search' || activeTab === 'recommend') && jobs.length > 0 ? (
                 jobs.map((job) => (
                   <div 
                     key={job.slug} 
@@ -254,6 +275,19 @@ const Jobs = () => {
                     <div className="meta-badges">
                       <span className="badge badge-primary">{job.jobType}</span>
                       <span className="location-badge">{job.location}</span>
+                      {activeTab === 'recommend' && typeof job.matchScore === 'number' && (
+                        <span 
+                          className="badge match-score-badge"
+                          style={{
+                            backgroundColor: job.matchScore >= 70 ? 'hsl(var(--accent-green) / 0.1)' : job.matchScore >= 40 ? 'hsl(var(--accent-yellow) / 0.1)' : 'hsl(var(--accent-red) / 0.1)',
+                            color: job.matchScore >= 70 ? 'hsl(var(--accent-green))' : job.matchScore >= 40 ? 'hsl(var(--accent-yellow))' : 'hsl(var(--accent-red))',
+                            fontWeight: 700,
+                            border: '1px solid hsl(var(--border-color))'
+                          }}
+                        >
+                          {job.matchScore}% Match
+                        </span>
+                      )}
                     </div>
                     <div className="tags-row">
                       {job.tags?.slice(0, 3).map((tag, idx) => (
@@ -426,15 +460,15 @@ const Jobs = () => {
                     <p className="step-intro">Please confirm your contact details before submitting this application.</p>
                     <div className="form-group">
                       <label className="form-label">Full Name</label>
-                      <input type="text" className="form-control" value="Arshad Khan" readOnly />
+                      <input type="text" className="form-control" value={user?.name || ''} readOnly />
                     </div>
                     <div className="form-group">
                       <label className="form-label">Email Address</label>
-                      <input type="email" className="form-control" value="arshad@example.com" readOnly />
+                      <input type="email" className="form-control" value={user?.email || ''} readOnly />
                     </div>
                     <div className="form-group">
                       <label className="form-label">Phone Number</label>
-                      <input type="text" className="form-control" value="+91 98765 43210" readOnly />
+                      <input type="text" className="form-control" value={user?.phone || 'No phone number added'} readOnly />
                     </div>
                   </div>
                 )}

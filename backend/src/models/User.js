@@ -49,6 +49,26 @@ const UserSchema = new mongoose.Schema({
     type: [String],
     default: [],
   },
+  atsSkills: {
+    type: [String],
+    default: [],
+  },
+  atsTopMatch: {
+    role: { type: String, default: '' },
+    score: { type: Number, default: 0 },
+  },
+  atsResults: [
+    {
+      Role: { type: String },
+      'ATS Score': { type: Number },
+      'Matched Skills': { type: [String] },
+      'Missing Skills': { type: [String] }
+    }
+  ],
+  atsFeedback: {
+    type: String,
+    default: '',
+  },
   photoUrl: {
     type: String,
     default: '',
@@ -63,6 +83,22 @@ const UserSchema = new mongoose.Schema({
     {
       text: { type: String, required: true },
       date: { type: Date, default: Date.now }
+    }
+  ],
+  education: [
+    {
+      degree: { type: String, default: '' },
+      school: { type: String, default: '' },
+      year: { type: String, default: '' },
+      grade: { type: String, default: '' }
+    }
+  ],
+  experience: [
+    {
+      role: { type: String, default: '' },
+      company: { type: String, default: '' },
+      duration: { type: String, default: '' },
+      description: { type: String, default: '' }
     }
   ],
   resetPasswordToken: String,

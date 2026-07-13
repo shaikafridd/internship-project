@@ -2,6 +2,7 @@ const Enrollment = require('../models/Enrollment');
 const Course = require('../models/Course');
 const JobApplication = require('../models/JobApplication');
 const Task = require('../models/Task');
+const SavedJob = require('../models/SavedJob');
 
 // @desc    Get dashboard metrics and active data
 // @route   GET /api/dashboard
@@ -15,9 +16,9 @@ exports.getDashboardData = async (req, res, next) => {
     const certificatesCount = await Enrollment.countDocuments({ user: userId, status: 'completed' });
     const applicationsCount = await JobApplication.countDocuments({ user: userId });
 
-    // Mock count for Saved Jobs (15) and Messages (3) to match design mockup
-    const savedJobsCount = 15;
-    const messagesCount = 3;
+    // Dynamic counts from database
+    const savedJobsCount = await SavedJob.countDocuments({ user: userId });
+    const messagesCount = 0;
 
     // 2. Continue Learning: Get user's most recent active enrollment
     const continueLearningEnrollment = await Enrollment.findOne({ user: userId, status: 'active' })

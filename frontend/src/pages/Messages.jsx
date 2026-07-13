@@ -1,6 +1,9 @@
 import React, { useState } from 'react';
+import { useAuth } from '../context/AuthContext';
 
 const Messages = () => {
+  const { user } = useAuth();
+  const firstName = user?.name?.split(' ')[0] || 'User';
   const [activeChatId, setActiveChatId] = useState('1');
   const chats = [
     {
@@ -11,7 +14,7 @@ const Messages = () => {
       time: '10:30 AM',
       unread: true,
       messages: [
-        { id: '1a', sender: 'Sarah', text: 'Hi Arshad, we reviewed your application for the Frontend Developer role and were really impressed with your portfolio!', time: '10:28 AM' },
+        { id: '1a', sender: 'Sarah', text: `Hi ${firstName}, we reviewed your application for the Frontend Developer role and were really impressed with your portfolio!`, time: '10:28 AM' },
         { id: '1b', sender: 'Sarah', text: 'Are you available for a brief introductory call tomorrow at 11:00 AM IST?', time: '10:30 AM' }
       ]
     },
@@ -23,7 +26,7 @@ const Messages = () => {
       time: 'Yesterday',
       unread: false,
       messages: [
-        { id: '2a', sender: 'David', text: 'Hi Arshad, congratulations! You have been shortlisted for the UI/UX Designer role interview.', time: 'Yesterday' },
+        { id: '2a', sender: 'David', text: `Hi ${firstName}, congratulations! You have been shortlisted for the UI/UX Designer role interview.`, time: 'Yesterday' },
         { id: '2b', sender: 'David', text: 'Please review the case study task and let us know when you can present it.', time: 'Yesterday' }
       ]
     },
@@ -48,7 +51,7 @@ const Messages = () => {
     if (!msgText.trim()) return;
     activeChat.messages.push({
       id: Math.random().toString(),
-      sender: 'Arshad',
+      sender: 'Me',
       text: msgText.trim(),
       time: 'Just Now'
     });
@@ -104,7 +107,7 @@ const Messages = () => {
 
           <div className="messages-box">
             {activeChat.messages.map((msg) => {
-              const isMe = msg.sender === 'Arshad';
+              const isMe = msg.sender === 'Me';
 
               return (
                 <div key={msg.id} className={`message-bubble-row ${isMe ? 'msg-me' : 'msg-them'}`}>

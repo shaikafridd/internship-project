@@ -81,6 +81,18 @@ export const AuthProvider = ({ children }) => {
     setUser(null);
   };
 
+  // Reload user profile from backend
+  const reloadUser = async () => {
+    try {
+      const res = await authAPI.getMe();
+      if (res.success && res.data) {
+        setUser(res.data);
+      }
+    } catch (err) {
+      console.error('Failed to reload user data', err);
+    }
+  };
+
   const clearError = () => setError(null);
 
   const value = {
@@ -90,6 +102,7 @@ export const AuthProvider = ({ children }) => {
     login,
     signup,
     logout,
+    reloadUser,
     clearError,
     isAuthenticated: !!user,
   };

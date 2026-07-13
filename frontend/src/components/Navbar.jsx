@@ -46,12 +46,35 @@ const Navbar = ({ toggleSidebar }) => {
         {/* User Card */}
         {user && (
           <div className="navbar-user-card" onClick={() => navigate('/profile')}>
-            <img
-              src={user.photoUrl || 'https://randomuser.me/api/portraits/men/43.jpg'}
-              alt={user.name}
-              className="navbar-avatar"
-            />
-            <span className="navbar-username">{user.name.split(' ')[0]}</span>
+            {user.photoUrl ? (
+              <img
+                src={user.photoUrl}
+                alt={user.name}
+                className="navbar-avatar"
+              />
+            ) : (
+              <div 
+                className="navbar-avatar-initials"
+                style={{
+                  width: '32px',
+                  height: '32px',
+                  borderRadius: '50%',
+                  backgroundColor: 'hsl(var(--primary) / 0.1)',
+                  color: 'hsl(var(--primary))',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontSize: '0.85rem',
+                  fontWeight: 700,
+                  border: '1px solid hsl(var(--border-color))'
+                }}
+              >
+                {user.name.split(' ').map(p => p[0]).join('').substring(0, 2).toUpperCase()}
+              </div>
+            )}
+            <span className="navbar-username" style={{ marginLeft: !user.photoUrl ? '8px' : '0px' }}>
+              {user.name.split(' ')[0]}
+            </span>
           </div>
         )}
       </div>

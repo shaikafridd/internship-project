@@ -1,18 +1,51 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { jobsAPI } from '../services/api';
 
 const SavedJobs = () => {
   const navigate = useNavigate();
-  const [jobs, setJobs] = useState([
-    { id: '1', title: 'Backend Developer (Node.js)', company: 'CodeVerse Pvt. Ltd.', location: 'Hyderabad, India', tags: ['Node.js', 'Express.js', 'MongoDB', 'REST API'], salary: '₹ 8 - 12 LPA' },
-    { id: '2', title: 'Data Analyst', company: 'DataInsights', location: 'Pune, India', tags: ['SQL', 'Python', 'Power BI', 'Excel'], salary: '₹ 6 - 9 LPA' },
-    { id: '3', title: 'Product Manager', company: 'InnovaTech', location: 'Bengaluru, India', tags: ['Product Strategy', 'Roadmap', 'Agile', 'JIRA'], salary: '₹ 15 - 20 LPA' }
-  ]);
+  const [jobs, setJobs] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
 
-  const handleRemove = (id, e) => {
-    e.stopPropagation();
-    setJobs(jobs.filter(j => j.id !== id));
+  const fetchSavedJobs = async () => {
+    setLoading(true);
+    try {
+      const res = await jobsAPI.getSavedJobs();
+      if (res.success && res.data) {
+        setJobs(res.data);
+      }
+    } catch (err) {
+      console.error('Failed to fetch saved jobs', err);
+      setError('Unable to load saved jobs.');
+    } finally {
+      setLoading(false);
+    }
   };
+
+  useEffect(() => {
+    fetchSavedJobs();
+  }, []);
+
+  const handleRemove = async (slug, e) => {
+    e.stopPropagation();
+    try {
+      const res = await jobsAPI.toggleSaveJob(slug, {});
+      if (res.success) {
+        setJobs(prev => prev.filter(j => j.slug !== slug));
+      }
+    } catch (err) {
+      console.error('Failed to remove saved job', err);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="spinner-container" style={{ minHeight: '300px' }}>
+        <div className="spinner"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="saved-jobs-wrapper animate-fade-in">
@@ -20,6 +53,8 @@ const SavedJobs = () => {
         <h2>Saved Jobs</h2>
         <p style={{ color: 'hsl(var(--text-secondary))', fontSize: '0.9rem' }}>Keep track of job opportunities you are interested in.</p>
       </div>
+
+      {error && <p className="error-msg">{error}</p>}
 
       {jobs.length === 0 ? (
         <div className="empty-state glass-panel" style={{ padding: '60px 20px', textAlign: 'center' }}>
@@ -31,16 +66,16 @@ const SavedJobs = () => {
       ) : (
         <div className="saved-list">
           {jobs.map((job) => (
-            <div key={job.id} className="saved-item-card glass-panel" onClick={() => navigate('/jobs')}>
+            <div key={job.slug} className="saved-item-card glass-panel" onClick={() => navigate('/jobs')}>
               <div className="item-left">
                 <div className="job-avatar-letter">
-                  <span>{job.company[0]}</span>
+                  <span>{job.company?.[0] || 'J'}</span>
                 </div>
                 <div className="item-meta">
                   <h3>{job.title}</h3>
                   <p className="company-details">{job.company} • 📍 {job.location}</p>
                   <div className="tags-row" style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginTop: '10px' }}>
-                    {job.tags.map((tag, idx) => (
+                    {job.tags?.map((tag, idx) => (
                       <span key={idx} className="badge badge-primary">{tag}</span>
                     ))}
                   </div>
@@ -48,10 +83,9 @@ const SavedJobs = () => {
               </div>
 
               <div className="item-right" style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '10px' }}>
-                <span className="salary-info" style={{ fontWeight: '700', fontSize: '0.9rem', color: 'hsl(var(--text-primary))' }}>{job.salary}</span>
                 <div style={{ display: 'flex', gap: '10px' }}>
                   <button className="btn btn-primary" style={{ padding: '8px 14px', fontSize: '0.8rem' }}>Apply Now</button>
-                  <button className="btn btn-secondary" style={{ padding: '8px', color: 'hsl(var(--accent-red))' }} onClick={(e) => handleRemove(job.id, e)} aria-label="Remove Saved Job">🗑️</button>
+                  <button className="btn btn-secondary" style={{ padding: '8px', color: 'hsl(var(--accent-red))' }} onClick={(e) => handleRemove(job.slug, e)} aria-label="Remove Saved Job">🗑️</button>
                 </div>
               </div>
             </div>

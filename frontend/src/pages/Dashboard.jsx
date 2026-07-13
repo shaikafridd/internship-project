@@ -1,9 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 import { dashboardAPI } from '../services/api';
 
 const Dashboard = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const firstName = user?.name?.split(' ')[0] || 'User';
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -67,7 +70,7 @@ const Dashboard = () => {
       
       {/* Greeting Banner */}
       <div className="greeting-header">
-        <h2>Good Morning, Arshad! 👋</h2>
+        <h2>Good Morning, {firstName}! 👋</h2>
         <p>Let's continue your learning journey.</p>
       </div>
 
@@ -75,7 +78,7 @@ const Dashboard = () => {
       <div className="stats-row">
         <div className="stat-widget glass-panel">
           <div className="stat-left">
-            <span className="value">{stats?.enrolledCourses || 12}</span>
+            <span className="value">{stats?.enrolledCourses ?? 0}</span>
             <span className="label">Enrolled Courses</span>
             <span className="view-all-link" onClick={() => navigate('/courses')}>View all</span>
           </div>
@@ -88,7 +91,7 @@ const Dashboard = () => {
 
         <div className="stat-widget glass-panel">
           <div className="stat-left">
-            <span className="value">{stats?.certificates || 5}</span>
+            <span className="value">{stats?.certificates ?? 0}</span>
             <span className="label">Certificates</span>
             <span className="view-all-link" onClick={() => navigate('/profile')}>View all</span>
           </div>
@@ -101,7 +104,7 @@ const Dashboard = () => {
 
         <div className="stat-widget glass-panel">
           <div className="stat-left">
-            <span className="value">{stats?.applications || 8}</span>
+            <span className="value">{stats?.applications ?? 0}</span>
             <span className="label">Applications</span>
             <span className="view-all-link" onClick={() => navigate('/jobs')}>View all</span>
           </div>
@@ -114,7 +117,7 @@ const Dashboard = () => {
 
         <div className="stat-widget glass-panel">
           <div className="stat-left">
-            <span className="value">{stats?.savedJobs || 15}</span>
+            <span className="value">{stats?.savedJobs ?? 0}</span>
             <span className="label">Saved Jobs</span>
             <span className="view-all-link" onClick={() => navigate('/jobs')}>View all</span>
           </div>
@@ -127,7 +130,7 @@ const Dashboard = () => {
 
         <div className="stat-widget glass-panel">
           <div className="stat-left">
-            <span className="value">{stats?.messages || 3}</span>
+            <span className="value">{stats?.messages ?? 0}</span>
             <span className="label">Messages</span>
             <span className="view-all-link" onClick={() => navigate('/dashboard')}>View all</span>
           </div>

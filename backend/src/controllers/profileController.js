@@ -34,7 +34,13 @@ exports.getProfile = async (req, res, next) => {
         dob: user.dob,
         aboutMe: user.aboutMe,
         skills: user.skills,
+        atsSkills: user.atsSkills,
+        atsTopMatch: user.atsTopMatch,
+        atsResults: user.atsResults,
+        atsFeedback: user.atsFeedback,
         photoUrl: user.photoUrl,
+        education: user.education || [],
+        experience: user.experience || [],
         achievements: user.achievements,
         activityLog: user.activityLog.sort((a, b) => b.date - a.date),
         stats: {
@@ -66,6 +72,8 @@ exports.updateProfile = async (req, res, next) => {
       aboutMe: req.body.aboutMe,
       skills: req.body.skills,
       photoUrl: req.body.photoUrl,
+      education: req.body.education,
+      experience: req.body.experience,
     };
 
     // Clean undefined fields to prevent overwriting with null

@@ -35,7 +35,13 @@ const estimateSalary = (title) => {
 // @access  Private (or Public, but we require protect if we want isSaved)
 exports.getJobs = async (req, res, next) => {
   try {
-    const { search, location, jobType } = req.query;
+    const { search, location, jobType, recommend } = req.query;
+
+    // Fetch user profile to match skills and top role
+    const user = await User.findById(req.user.id);
+    const userSkills = user?.skills || [];
+    const topRole = user?.atsTopMatch?.role || '';
+    const roleLower = topRole.toLowerCase();
 
     // Fetch from Arbeitnow
     const response = await fetch('https://www.arbeitnow.com/api/job-board-api');
@@ -77,8 +83,8 @@ exports.getJobs = async (req, res, next) => {
       savedSlugs = savedJobs.map(s => s.slug);
     }
 
-    // Format jobs
-    const formattedJobs = jobs.map(j => {
+    // Format jobs and compute match scores
+    let formattedJobs = jobs.map(j => {
       // Clean tags (remove duplicates or empty, ensure they have some default tags if empty)
       let tags = j.tags || [];
       if (tags.length === 0) {
@@ -87,6 +93,43 @@ exports.getJobs = async (req, res, next) => {
         else if (j.title.toLowerCase().includes('node')) tags = ['Node.js', 'Express.js', 'MongoDB'];
         else tags = ['Tech', 'Development'];
       }
+
+      // Calculate matching score
+      let score = 0;
+      const titleLower = j.title.toLowerCase();
+      const descLower = (j.description || '').toLowerCase();
+      const tagsLower = tags.map(t => t.toLowerCase());
+
+      // Skill Matching
+      if (userSkills.length > 0) {
+        userSkills.forEach(skill => {
+          const skillLower = skill.toLowerCase();
+          if (tagsLower.includes(skillLower)) {
+            score += 20; // exact match in tags
+          } else if (titleLower.includes(skillLower)) {
+            score += 15; // match in job title
+          } else if (descLower.includes(skillLower)) {
+            score += 5;  // match in description
+          }
+        });
+      }
+
+      // Role Matching
+      if (roleLower) {
+        if (titleLower.includes(roleLower)) {
+          score += 35; // title contains exact role string
+        } else {
+          // Check for core keyword overlaps (ignoring generic terms)
+          const words = roleLower.split(' ').filter(w => w.length > 3 && w !== 'developer' && w !== 'engineer');
+          words.forEach(w => {
+            if (titleLower.includes(w)) {
+              score += 15;
+            }
+          });
+        }
+      }
+
+      const matchScore = Math.min(100, score);
 
       return {
         slug: j.slug,
@@ -101,8 +144,14 @@ exports.getJobs = async (req, res, next) => {
         isSaved: savedSlugs.includes(j.slug),
         description: j.description,
         url: j.url,
+        matchScore: matchScore,
       };
     });
+
+    // If recommended filter is active, sort by matchScore descending
+    if (recommend === 'true') {
+      formattedJobs = formattedJobs.sort((a, b) => b.matchScore - a.matchScore);
+    }
 
     res.status(200).json({
       success: true,

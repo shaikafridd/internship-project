@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { profileAPI } from '../services/api';
 
 const Profile = () => {
+  const navigate = useNavigate();
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -29,18 +31,18 @@ const Profile = () => {
         setProfile(res.data);
         
         // Pre-fill fields
-        setPhone(res.data.phone || '+91 98765 43210');
-        setLocation(res.data.location || 'Hyderabad, India');
-        setGender(res.data.gender || 'Male');
-        setAboutMe(res.data.aboutMe || 'Passionate web developer with a strong interest in building clean, user-friendly web applications. I love learning new technologies and solving real-world problems.');
-        setSkillsStr(res.data.skills?.join(', ') || 'HTML, CSS, JavaScript, React, Node.js, Tailwind CSS, Git & GitHub, Figma');
+        setPhone(res.data.phone || '');
+        setLocation(res.data.location || '');
+        setGender(res.data.gender || '');
+        setAboutMe(res.data.aboutMe || 'No bio added yet. Click Edit to add a bio.');
+        setSkillsStr(res.data.skills?.join(', ') || '');
         setPhotoUrl(res.data.photoUrl || '');
         
         if (res.data.dob) {
           const dateObj = new Date(res.data.dob);
           setDob(dateObj.toISOString().split('T')[0]);
         } else {
-          setDob('2002-05-15');
+          setDob('');
         }
       } else {
         throw new Error(res.message || 'Failed to retrieve profile details');
@@ -116,7 +118,7 @@ const Profile = () => {
     );
   }
 
-  const { name, email, achievements, activityLog, stats, skills } = profile;
+  const { name, email, achievements, activityLog, stats, skills, atsTopMatch, atsResults, atsFeedback, atsSkills, education, experience } = profile;
 
   return (
     <div className="profile-wrapper animate-fade-in">
@@ -136,11 +138,32 @@ const Profile = () => {
           <div className="profile-header-card glass-panel">
             <div className="header-flex-row">
               <div className="avatar-uploader-circle">
-                <img 
-                  src={photoUrl || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=200'} 
-                  alt={name} 
-                  className="profile-avatar"
-                />
+                {photoUrl ? (
+                  <img 
+                    src={photoUrl} 
+                    alt={name} 
+                    className="profile-avatar"
+                  />
+                ) : (
+                  <div 
+                    className="profile-avatar-initials"
+                    style={{
+                      width: '100%',
+                      height: '100%',
+                      borderRadius: '50%',
+                      backgroundColor: 'hsl(var(--primary) / 0.1)',
+                      color: 'hsl(var(--primary))',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontSize: '2.5rem',
+                      fontWeight: 800,
+                      border: '1px solid hsl(var(--border-color))'
+                    }}
+                  >
+                    {name.split(' ').map(p => p[0]).join('').substring(0, 2).toUpperCase()}
+                  </div>
+                )}
                 <button className="cam-btn" aria-label="Upload Photo">📷</button>
               </div>
 
@@ -149,10 +172,10 @@ const Profile = () => {
                   <h2>{name}</h2>
                   <button className="btn-edit-inline" onClick={() => setIsEditing(true)}>Edit</button>
                 </div>
-                <p className="role">Web Developer</p>
+                <p className="role">{atsTopMatch?.role || 'Job Seeker'}</p>
                 <div className="details-list-vertical">
                   <span className="detail-item">
-                    📍 {location || 'Hyderabad, India'}
+                    📍 {location || 'No location set'}
                   </span>
                   <span className="detail-item">
                     ✉️ {email}
@@ -285,72 +308,73 @@ const Profile = () => {
               )}
 
               {activeTab === 'Education' && (
-                <div className="info-block-card glass-panel">
+                <div className="info-block-card glass-panel animate-fade-in">
                   <div className="title-row">
                     <h3>Education History</h3>
-                    <button className="btn-edit-inline" onClick={() => setIsEditing(true)}>Edit</button>
+                    <button className="btn btn-secondary btn-sm" onClick={() => navigate('/ats-analyzer')}>
+                      Scan Resume
+                    </button>
                   </div>
                   
                   <div className="timeline-list-block">
-                    <div className="timeline-card-item">
-                      <div className="badge-marker">🎓</div>
-                      <div className="timeline-card-details">
-                        <h4>Bachelor of Technology in Computer Science</h4>
-                        <p className="sub">Hyderabad Institute of Technology • 2020 - 2024</p>
-                        <span className="grade-badge">Grade: 8.5 CGPA</span>
+                    {education && education.length > 0 ? (
+                      education.map((edu, idx) => (
+                        <div key={edu._id || idx} className="timeline-card-item" style={{ marginTop: idx > 0 ? '20px' : '0px' }}>
+                          <div className="badge-marker">🎓</div>
+                          <div className="timeline-card-details">
+                            <h4>{edu.degree}</h4>
+                            <p className="sub">{edu.school} • {edu.year}</p>
+                            {edu.grade && <span className="grade-badge">{edu.grade}</span>}
+                          </div>
+                        </div>
+                      ))
+                    ) : (
+                      <div className="empty-placeholder" style={{ padding: '24px', textAlign: 'center', color: 'hsl(var(--text-muted))' }}>
+                        <span style={{ fontSize: '2.5rem', display: 'block', marginBottom: '8px' }}>🎓</span>
+                        <p style={{ margin: 0, fontSize: '0.85rem', fontWeight: 600 }}>No education history parsed yet.</p>
+                        <span style={{ fontSize: '0.75rem', display: 'block', marginTop: '6px', lineHeight: 1.4 }}>
+                          Upload your resume in the <strong style={{ color: 'hsl(var(--primary))', cursor: 'pointer' }} onClick={() => navigate('/ats-analyzer')}>ATS Optimizer</strong> to automatically extract and save your education details.
+                        </span>
                       </div>
-                    </div>
-
-                    <div className="timeline-card-item" style={{ marginTop: '20px' }}>
-                      <div className="badge-marker">🏫</div>
-                      <div className="timeline-card-details">
-                        <h4>Senior Secondary Certificate (Class XII)</h4>
-                        <p className="sub">Alpha Junior College • 2018 - 2020</p>
-                        <span className="grade-badge">Grade: 93%</span>
-                      </div>
-                    </div>
-
-                    <div className="timeline-card-item" style={{ marginTop: '20px' }}>
-                      <div className="badge-marker">🏫</div>
-                      <div className="timeline-card-details">
-                        <h4>Secondary School Certificate (Class X)</h4>
-                        <p className="sub">St. Pauls High School • Completed 2018</p>
-                        <span className="grade-badge">Grade: 9.2 GPA</span>
-                      </div>
-                    </div>
+                    )}
                   </div>
                 </div>
               )}
 
               {activeTab === 'Experience' && (
-                <div className="info-block-card glass-panel">
+                <div className="info-block-card glass-panel animate-fade-in">
                   <div className="title-row">
                     <h3>Work Experience</h3>
-                    <button className="btn-edit-inline" onClick={() => setIsEditing(true)}>Edit</button>
+                    <button className="btn btn-secondary btn-sm" onClick={() => navigate('/ats-analyzer')}>
+                      Scan Resume
+                    </button>
                   </div>
 
                   <div className="timeline-list-block">
-                    <div className="timeline-card-item">
-                      <div className="badge-marker">💼</div>
-                      <div className="timeline-card-details">
-                        <h4>Frontend Web Developer Intern</h4>
-                        <p className="sub">TechNova Solutions • Jan 2024 - Present</p>
-                        <p className="desc-text" style={{ fontSize: '0.8rem', color: 'hsl(var(--text-secondary))', marginTop: '6px', lineHeight: '1.4' }}>
-                          Building responsive React.js dashboards, integrating REST API middlewares, HSL css design tokens, and CSS layout grids.
-                        </p>
+                    {experience && experience.length > 0 ? (
+                      experience.map((exp, idx) => (
+                        <div key={exp._id || idx} className="timeline-card-item" style={{ marginTop: idx > 0 ? '20px' : '0px' }}>
+                          <div className="badge-marker">💼</div>
+                          <div className="timeline-card-details">
+                            <h4>{exp.role}</h4>
+                            <p className="sub">{exp.company} • {exp.duration}</p>
+                            {exp.description && (
+                              <p className="desc-text" style={{ fontSize: '0.8rem', color: 'hsl(var(--text-secondary))', marginTop: '6px', lineHeight: '1.4' }}>
+                                {exp.description}
+                              </p>
+                            )}
+                          </div>
+                        </div>
+                      ))
+                    ) : (
+                      <div className="empty-placeholder" style={{ padding: '24px', textAlign: 'center', color: 'hsl(var(--text-muted))' }}>
+                        <span style={{ fontSize: '2.5rem', display: 'block', marginBottom: '8px' }}>💼</span>
+                        <p style={{ margin: 0, fontSize: '0.85rem', fontWeight: 600 }}>No work experience parsed yet.</p>
+                        <span style={{ fontSize: '0.75rem', display: 'block', marginTop: '6px', lineHeight: 1.4 }}>
+                          Upload your resume in the <strong style={{ color: 'hsl(var(--primary))', cursor: 'pointer' }} onClick={() => navigate('/ats-analyzer')}>ATS Optimizer</strong> to automatically extract and save your work history.
+                        </span>
                       </div>
-                    </div>
-
-                    <div className="timeline-card-item" style={{ marginTop: '20px' }}>
-                      <div className="badge-marker">💼</div>
-                      <div className="timeline-card-details">
-                        <h4>Web Design Intern</h4>
-                        <p className="sub">PixelPerfect Agency • May 2023 - Jul 2023</p>
-                        <p className="desc-text" style={{ fontSize: '0.8rem', color: 'hsl(var(--text-secondary))', marginTop: '6px', lineHeight: '1.4' }}>
-                          Designed UX wireframes in Figma and coded semantic HTML5/CSS3 prototype landing screens.
-                        </p>
-                      </div>
-                    </div>
+                    )}
                   </div>
                 </div>
               )}
@@ -386,27 +410,108 @@ const Profile = () => {
               )}
 
               {activeTab === 'Resume' && (
-                <div className="info-block-card glass-panel">
+                <div className="info-block-card glass-panel animate-fade-in">
                   <div className="title-row">
-                    <h3>My Resume</h3>
-                    <button className="btn-edit-inline" onClick={() => setIsEditing(true)}>Edit</button>
+                    <h3>ATS Resume Optimization</h3>
+                    <button className="btn btn-secondary btn-sm" onClick={() => navigate('/ats-analyzer')}>
+                      Scan New Resume
+                    </button>
                   </div>
 
-                  <div className="resume-details-box">
+                  <div className="resume-details-box" style={{ display: 'flex', flexDirection: 'column', gap: '20px', marginTop: '16px' }}>
+                    {/* Resume File Info */}
                     <div className="resume-file-card" style={{ display: 'flex', alignItems: 'center', gap: '16px', padding: '16px', backgroundColor: '#f8fafc', borderRadius: '8px', border: '1px solid hsl(var(--border-color))' }}>
                       <span style={{ fontSize: '2rem' }}>📄</span>
                       <div style={{ flex: 1 }}>
-                        <h4 style={{ fontSize: '0.9rem' }}>Arshad_Khan_Resume.pdf</h4>
-                        <span style={{ fontSize: '0.75rem', color: 'hsl(var(--text-muted))', fontWeight: 600 }}>Size: 245 KB • Uploaded Jan 20, 2024</span>
+                        <h4 style={{ fontSize: '0.9rem' }}>My_Scanned_Resume.pdf</h4>
+                        <span style={{ fontSize: '0.75rem', color: 'hsl(var(--text-muted))', fontWeight: 600 }}>
+                          {atsTopMatch?.role ? 'Scanned successfully via ATS Optimizer' : 'Not yet scanned'}
+                        </span>
                       </div>
-                      <button className="btn btn-primary" style={{ padding: '6px 12px', fontSize: '0.75rem' }}>Download</button>
+                      <button className="btn btn-primary" style={{ padding: '6px 12px', fontSize: '0.75rem' }} onClick={() => navigate('/ats-analyzer')}>
+                        Open Scanner
+                      </button>
                     </div>
 
-                    <div className="resume-upload-dropzone" style={{ marginTop: '24px', border: '2px dashed hsl(var(--border-color))', borderRadius: '8px', padding: '30px 20px', textAlign: 'center', cursor: 'pointer' }}>
-                      <span style={{ fontSize: '1.8rem', display: 'block', marginBottom: '8px' }}>📤</span>
-                      <p style={{ fontSize: '0.8rem', fontWeight: 600 }}>Upload New Resume</p>
-                      <span style={{ fontSize: '0.75rem', color: 'hsl(var(--text-muted))' }}>Drag and drop a PDF file here (Max 5MB)</span>
-                    </div>
+                    {atsTopMatch?.role ? (
+                      <>
+                        {/* ATS Stats Summary Grid */}
+                        <div className="ats-profile-summary-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: '20px', marginTop: '10px' }}>
+                          {/* Left: Score Visualizer */}
+                          <div className="ats-score-box" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '20px', background: 'linear-gradient(135deg, hsl(var(--primary) / 0.03) 0%, transparent 100%)', border: '1px solid hsl(var(--border-color))', borderRadius: '12px', textAlign: 'center' }}>
+                            <div className="ats-score-circle" style={{ position: 'relative', width: '100px', height: '100px', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 12px' }}>
+                              <svg className="svg-circle" width="100" height="100" viewBox="0 0 100 100" style={{ transform: 'rotate(-90deg)' }}>
+                                <circle cx="50" cy="50" r="42" fill="none" stroke="hsl(var(--border-color))" strokeWidth="6" />
+                                <circle 
+                                  cx="50" cy="50" r="42" 
+                                  fill="none" 
+                                  stroke={atsTopMatch.score >= 70 ? 'hsl(var(--accent-green))' : atsTopMatch.score >= 40 ? 'hsl(var(--accent-yellow))' : 'hsl(var(--accent-red))'} 
+                                  strokeWidth="6" 
+                                  strokeLinecap="round"
+                                  style={{
+                                    strokeDasharray: '263.89',
+                                    strokeDashoffset: (263.89 - (263.89 * atsTopMatch.score) / 100).toString()
+                                  }}
+                                />
+                              </svg>
+                              <div style={{ position: 'absolute', fontFamily: 'var(--font-title)', fontSize: '1.4rem', fontWeight: 800 }}>
+                                {atsTopMatch.score}%
+                              </div>
+                            </div>
+                            <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'hsl(var(--text-secondary))', textTransform: 'uppercase', letterSpacing: '0.05em' }}>ATS Score</span>
+                          </div>
+
+                          {/* Right: Top Match Details */}
+                          <div className="ats-role-details" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: '8px' }}>
+                            <span className="badge" style={{ alignSelf: 'flex-start', backgroundColor: 'hsl(var(--primary) / 0.1)', color: 'hsl(var(--primary))', fontSize: '0.7rem', fontWeight: 700, textTransform: 'uppercase', padding: '4px 8px' }}>Top Career Track</span>
+                            <h4 style={{ fontSize: '1.25rem', fontWeight: 800 }}>{atsTopMatch.role}</h4>
+                            <p style={{ fontSize: '0.85rem', color: 'hsl(var(--text-secondary))', lineHeight: 1.4 }}>
+                              Your resume matches this role best. Check out your customized recommended job matches in the job portal!
+                            </p>
+                          </div>
+                        </div>
+
+                        {/* LLM Feedback Summary */}
+                        {atsFeedback && (
+                          <div className="ats-profile-feedback-box" style={{ marginTop: '10px', padding: '20px', backgroundColor: 'hsl(var(--bg-dark))', border: '1px solid hsl(var(--border-color))', borderRadius: '12px' }}>
+                            <h4 style={{ fontSize: '0.95rem', fontWeight: 700, marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                              <span>💡</span> Latest Optimizer Feedback
+                            </h4>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                              {atsFeedback.split('\n\n').slice(0, 2).map((para, pIdx) => {
+                                const parts = para.split(': ');
+                                return (
+                                  <p key={pIdx} style={{ fontSize: '0.85rem', color: 'hsl(var(--text-secondary))', lineHeight: 1.5 }}>
+                                    {parts.length >= 2 ? (
+                                      <>
+                                        <strong>{parts[0]}: </strong>
+                                        {parts.slice(1).join(': ')}
+                                      </>
+                                    ) : para}
+                                  </p>
+                                );
+                              })}
+                              {atsFeedback.split('\n\n').length > 2 && (
+                                <span 
+                                  onClick={() => navigate('/ats-analyzer')} 
+                                  style={{ color: 'hsl(var(--primary))', fontSize: '0.8rem', fontWeight: 700, cursor: 'pointer', alignSelf: 'flex-start', marginTop: '4px' }}
+                                >
+                                  Read full suggestions &rarr;
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                        )}
+                      </>
+                    ) : (
+                      <div className="resume-upload-dropzone" onClick={() => navigate('/ats-analyzer')} style={{ marginTop: '10px', border: '2px dashed hsl(var(--border-color))', borderRadius: '8px', padding: '40px 20px', textAlign: 'center', cursor: 'pointer' }}>
+                        <span style={{ fontSize: '2rem', display: 'block', marginBottom: '8px' }}>⚡</span>
+                        <p style={{ fontSize: '0.85rem', fontWeight: 700 }}>Optimize Your Resume for ATS</p>
+                        <span style={{ fontSize: '0.8rem', color: 'hsl(var(--text-muted))', lineHeight: 1.4, display: 'block', marginTop: '6px' }}>
+                          Upload your PDF resume to parse skills, check career compatibility scores, and unlock personalized recommended jobs.
+                        </span>
+                      </div>
+                    )}
                   </div>
                 </div>
               )}
@@ -476,25 +581,26 @@ const Profile = () => {
           <div className="details-card-block glass-panel">
             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '16px' }}>
               <h3>Recent Achievements</h3>
-              <span className="view-all-link">View all</span>
             </div>
 
             <div className="profile-timeline-list">
-              {(achievements && achievements.length > 0 ? achievements : [
-                { title: 'Python Certificate - Completed Python for Beginners', date: '2024-05-10T00:00:00.000Z' },
-                { title: 'UI/UX Design Course - Completed UI/UX Design Basics', date: '2024-04-20T00:00:00.000Z' },
-                { title: 'Web Development Bootcamp - Completed 10 Projects', date: '2024-03-15T00:00:00.000Z' }
-              ]).map((ach, idx) => (
-                <div key={idx} className="timeline-row-item">
-                  <div className="icon-badge-box bg-green">🟢</div>
-                  <div className="row-content">
-                    <p className="title">{ach.title}</p>
-                    <span className="date-label">
-                      {new Date(ach.date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}
-                    </span>
+              {achievements && achievements.length > 0 ? (
+                achievements.map((ach, idx) => (
+                  <div key={idx} className="timeline-row-item">
+                    <div className="icon-badge-box bg-green">🟢</div>
+                    <div className="row-content">
+                      <p className="title">{ach.title}</p>
+                      <span className="date-label">
+                        {new Date(ach.date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}
+                      </span>
+                    </div>
                   </div>
+                ))
+              ) : (
+                <div style={{ padding: '16px', fontSize: '0.8rem', color: 'hsl(var(--text-muted))', textAlign: 'center' }}>
+                  No achievements recorded yet. Complete course modules or scan resumes to unlock milestones.
                 </div>
-              ))}
+              )}
             </div>
           </div>
 
@@ -502,25 +608,26 @@ const Profile = () => {
           <div className="details-card-block glass-panel">
             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '16px' }}>
               <h3>Recent Activity</h3>
-              <span className="view-all-link">View all</span>
             </div>
 
             <div className="profile-timeline-list">
-              {(activityLog && activityLog.length > 0 ? activityLog : [
-                { text: 'Enrolled in UI/UX Design Fundamentals', date: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000) },
-                { text: 'Applied for Frontend Developer', date: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000) },
-                { text: 'Earned Certificate in React Basics', date: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000) }
-              ]).map((log, idx) => (
-                <div key={idx} className="timeline-row-item">
-                  <div className="icon-badge-box bg-blue">📝</div>
-                  <div className="row-content">
-                    <p className="title">{log.text}</p>
-                    <span className="date-label">
-                      {new Date(log.date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}
-                    </span>
+              {activityLog && activityLog.length > 0 ? (
+                activityLog.map((log, idx) => (
+                  <div key={idx} className="timeline-row-item">
+                    <div className="icon-badge-box bg-blue">📝</div>
+                    <div className="row-content">
+                      <p className="title">{log.text}</p>
+                      <span className="date-label">
+                        {new Date(log.date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}
+                      </span>
+                    </div>
                   </div>
+                ))
+              ) : (
+                <div style={{ padding: '16px', fontSize: '0.8rem', color: 'hsl(var(--text-muted))', textAlign: 'center' }}>
+                  No recent activities recorded.
                 </div>
-              ))}
+              )}
             </div>
           </div>
 

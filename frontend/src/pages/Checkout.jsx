@@ -213,7 +213,7 @@ const Checkout = () => {
         <div className="card-form animate-fade-in" style={{ padding: 0, marginTop: '14px' }}>
           <div className="form-group" style={{ marginBottom: 0 }}>
             <label className="form-label">Enter UPI ID</label>
-            <input type="text" className="form-control" placeholder="arshad@okaxis" defaultValue="arshad@okaxis" />
+            <input type="text" className="form-control" placeholder="yourname@okaxis" />
           </div>
         </div>
       )

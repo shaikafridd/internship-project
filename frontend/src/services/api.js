@@ -73,11 +73,12 @@ export const paymentAPI = {
 
 // Job Portal Endpoints
 export const jobsAPI = {
-  getJobs: (search = '', location = '', jobType = '') => {
+  getJobs: (search = '', location = '', jobType = '', recommend = false) => {
     const params = new URLSearchParams();
     if (search) params.append('search', search);
     if (location) params.append('location', location);
     if (jobType) params.append('jobType', jobType);
+    if (recommend) params.append('recommend', 'true');
     const queryStr = params.toString();
     return api.get(`/jobs${queryStr ? `?${queryStr}` : ''}`);
   },
@@ -87,9 +88,23 @@ export const jobsAPI = {
   getApplications: () => api.get('/jobs/applications'),
 };
 
-// ATS Resume Analyzer Endpoint
+// ATS Resume Analyzer Endpoint (Our Local Express Backend which routes to Render)
 export const atsAPI = {
-  analyzeResume: (resumeName) => api.post('/ats/analyze', { resumeName }),
+  analyzeResume: async (file, includeFeedback = false) => {
+    const formData = new FormData();
+    formData.append('file', file);
+    const res = await api.post(
+      `/ats/analyze?includeFeedback=${includeFeedback}`,
+      formData,
+      {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      }
+    );
+    return res.data;
+  },
+  saveAtsResults: (atsData) => api.post('/ats/save', atsData),
 };
 
 // User Profile Endpoints

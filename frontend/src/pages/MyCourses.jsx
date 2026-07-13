@@ -16,6 +16,72 @@ const MyCourses = () => {
   const [activeTab, setActiveTab] = useState('Overview');
   const [expandedSections, setExpandedSections] = useState({ 0: true });
 
+  // Custom Video Player States
+  const videoRef = React.useRef(null);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [currentTime, setCurrentTime] = useState(0);
+  const [duration, setDuration] = useState(0);
+  const [playbackSpeed, setPlaybackSpeed] = useState(1);
+  const [volume, setVolume] = useState(0.8);
+  const [isMuted, setIsMuted] = useState(false);
+  const [isFullscreen, setIsFullscreen] = useState(false);
+
+  const togglePlay = () => {
+    if (!videoRef.current) return;
+    if (isPlaying) {
+      videoRef.current.pause();
+    } else {
+      videoRef.current.play();
+    }
+    setIsPlaying(!isPlaying);
+  };
+
+  const skipTime = (amount) => {
+    if (!videoRef.current) return;
+    videoRef.current.currentTime = Math.max(0, Math.min(videoRef.current.duration || 0, videoRef.current.currentTime + amount));
+  };
+
+  const cycleSpeed = () => {
+    if (!videoRef.current) return;
+    const speeds = [1, 1.25, 1.5, 2];
+    const currentIdx = speeds.indexOf(playbackSpeed);
+    const nextSpeed = speeds[(currentIdx + 1) % speeds.length];
+    videoRef.current.playbackRate = nextSpeed;
+    setPlaybackSpeed(nextSpeed);
+  };
+
+  const toggleMute = () => {
+    if (!videoRef.current) return;
+    videoRef.current.muted = !isMuted;
+    setIsMuted(!isMuted);
+  };
+
+  const toggleFullscreen = () => {
+    if (!videoRef.current) return;
+    const container = videoRef.current.parentElement;
+    if (!document.fullscreenElement) {
+      container.requestFullscreen().catch(err => console.error(err));
+      setIsFullscreen(true);
+    } else {
+      document.exitFullscreen();
+      setIsFullscreen(false);
+    }
+  };
+
+  const handleProgressClick = (e) => {
+    if (!videoRef.current || !duration) return;
+    const rect = e.currentTarget.getBoundingClientRect();
+    const pos = (e.clientX - rect.left) / rect.width;
+    videoRef.current.currentTime = pos * duration;
+  };
+
+  const formatTime = (secs) => {
+    if (isNaN(secs)) return '00:00';
+    const m = Math.floor(secs / 60);
+    const s = Math.floor(secs % 60);
+    return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+  };
+
   const fetchEnrollment = async (isSilent = false) => {
     if (!isSilent) setLoading(true);
     try {
@@ -139,14 +205,129 @@ const MyCourses = () => {
             </div>
           </div>
 
-          {/* HTML5 Video Player */}
-          <div className="video-player-container glass-panel">
+          {/* Custom Video Player Container */}
+          <div className="video-player-container glass-panel" style={{ position: 'relative' }}>
             <video
+              ref={videoRef}
               src={activeLesson?.videoUrl || 'https://www.w3schools.com/html/mov_bbb.mp4'}
-              controls
               className="course-video"
-              poster="https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=800"
+              onClick={togglePlay}
+              onTimeUpdate={() => setCurrentTime(videoRef.current ? videoRef.current.currentTime : 0)}
+              onLoadedMetadata={() => setDuration(videoRef.current ? videoRef.current.duration : 0)}
+              onEnded={() => setIsPlaying(false)}
             />
+
+            {/* Browser Mock Poster Overlay when paused and at beginning */}
+            {!isPlaying && currentTime === 0 && (
+              <div className="custom-video-poster-overlay" onClick={togglePlay}>
+                <div className="poster-left">
+                  <h1>Introduction to <br/>UI/UX Design</h1>
+                  <p>Understanding the basics and the design thinking process.</p>
+                </div>
+                <div className="poster-right">
+                  <div className="mock-browser-window">
+                    <div className="browser-header">
+                      <span className="browser-dot dot-red"></span>
+                      <span className="browser-dot dot-yellow"></span>
+                      <span className="browser-dot dot-green"></span>
+                      <div className="browser-address-bar"></div>
+                    </div>
+                    <div className="browser-content">
+                      <div className="ui-badge-logo">UI</div>
+                      <div className="text-line long"></div>
+                      <div className="text-line short"></div>
+                      <div className="design-elements-row">
+                        <div className="mock-image-box">🖼️</div>
+                        <div className="mock-text-box">
+                          <span className="cursor-t">T</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                
+                {/* Big Play Button Overlay */}
+                <div className="big-play-btn-circle">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                </div>
+              </div>
+            )}
+
+            {/* Custom Video Control Bar */}
+            <div className="custom-player-controls">
+              
+              {/* Progress Slider Track */}
+              <div className="progress-slider-bar" onClick={handleProgressClick}>
+                <div 
+                  className="progress-slider-fill" 
+                  style={{ width: `${(currentTime / (duration || 1)) * 100}%` }}
+                ></div>
+                <div 
+                  className="progress-slider-handle"
+                  style={{ left: `${(currentTime / (duration || 1)) * 100}%` }}
+                ></div>
+              </div>
+
+              <div className="controls-row-buttons">
+                <div className="left-controls">
+                  <button className="control-btn" onClick={togglePlay} aria-label={isPlaying ? 'Pause' : 'Play'}>
+                    {isPlaying ? (
+                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
+                    ) : (
+                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                    )}
+                  </button>
+                  
+                  {/* Rewind 10s */}
+                  <button className="control-btn rewind-btn" onClick={() => skipTime(-10)} aria-label="Rewind 10s">
+                    <svg className="rewind-icon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2.5">
+                      <path d="M2.5 2v6h6M2.66 15.57a10 10 0 1 0-.57-8.38l.57 1.39"/>
+                    </svg>
+                    <span className="rewind-seconds-text">10</span>
+                  </button>
+
+                  {/* Speaker */}
+                  <button className="control-btn" onClick={toggleMute} aria-label={isMuted ? 'Unmute' : 'Mute'}>
+                    {isMuted || volume === 0 ? (
+                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M11 5L6 9H2v6h4l5 4V5zM23 9l-6 6m0-6l6 6"/></svg>
+                    ) : (
+                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M11 5L6 9H2v6h4l5 4V5zM15.54 8.46a5 5 0 0 1 0 7.07M19.07 4.93a10 10 0 0 1 0 14.14"/></svg>
+                    )}
+                  </button>
+
+                  <span className="time-display">
+                    {formatTime(currentTime)} / {formatTime(duration || 765)}
+                  </span>
+                </div>
+
+                <div className="right-controls">
+                  {/* Speed selection */}
+                  <button className="control-btn speed-btn" onClick={cycleSpeed}>
+                    {playbackSpeed}x
+                  </button>
+
+                  {/* CC Captions */}
+                  <button className="control-btn" aria-label="Captions">
+                    <span style={{ fontSize: '0.8rem', fontWeight: 800 }}>CC</span>
+                  </button>
+
+                  {/* Settings Gear */}
+                  <button className="control-btn" aria-label="Settings">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                      <circle cx="12" cy="12" r="3"/>
+                      <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+                    </svg>
+                  </button>
+
+                  {/* Fullscreen */}
+                  <button className="control-btn" onClick={toggleFullscreen} aria-label="Fullscreen">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                      <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/>
+                    </svg>
+                  </button>
+                </div>
+              </div>
+            </div>
           </div>
 
           {/* Navigation tabs */}
@@ -240,10 +421,22 @@ const MyCourses = () => {
           </div>
 
           <div className="accordion-playlist">
-            {(course?.sections || [
-              { title: 'Section 1: Introduction to UI/UX', lessons: [] },
+            {(course?.sections && course.sections.length > 0 ? course.sections : [
+              {
+                title: 'Section 1: Introduction to UI/UX',
+                lessons: [
+                  { id: 'l1', title: 'What is UI/UX Design?', duration: '08:15', videoUrl: 'https://www.w3schools.com/html/mov_bbb.mp4' },
+                  { id: 'l2', title: 'Design Thinking Process', duration: '12:45', videoUrl: 'https://www.w3schools.com/html/mov_bbb.mp4' },
+                  { id: 'l3', title: 'User Needs and Goals', duration: '10:20', videoUrl: 'https://www.w3schools.com/html/mov_bbb.mp4' },
+                  { id: 'l4', title: 'UI vs UX: Key Differences', duration: '07:30', videoUrl: 'https://www.w3schools.com/html/mov_bbb.mp4' },
+                  { id: 'l5', title: 'Career Opportunities in UI/UX', duration: '09:10', videoUrl: 'https://www.w3schools.com/html/mov_bbb.mp4' }
+                ]
+              },
               { title: 'Section 2: User Research', lessons: [] },
-              { title: 'Section 3: Wireframing', lessons: [] }
+              { title: 'Section 3: Wireframing', lessons: [] },
+              { title: 'Section 4: Design Principles', lessons: [] },
+              { title: 'Section 5: Prototyping', lessons: [] },
+              { title: 'Section 6: Tools & Handoff', lessons: [] }
             ]).map((section, sIdx) => (
               <div key={section._id || sIdx} className="section-accordion-item">
                 <button 
@@ -251,17 +444,28 @@ const MyCourses = () => {
                   onClick={() => toggleSection(sIdx)}
                 >
                   <span>{section.title}</span>
-                  <span className="accordion-arrow">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="6 9 12 15 18 9"/></svg>
-                  </span>
+                  {expandedSections[sIdx] ? (
+                    <span className="accordion-arrow open">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="18 15 12 9 6 15"/></svg>
+                    </span>
+                  ) : (
+                    <div className="section-meta-collapsed" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <span className="lesson-count-label" style={{ fontSize: '0.75rem', color: 'hsl(var(--text-secondary))', fontWeight: '500' }}>
+                        {sIdx === 1 ? '5 Lessons' : sIdx === 2 ? '4 Lessons' : sIdx === 3 ? '5 Lessons' : sIdx === 4 ? '4 Lessons' : sIdx === 5 ? '3 Lessons' : '5 Lessons'}
+                      </span>
+                      <span className="accordion-arrow">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+                      </span>
+                    </div>
+                  )}
                 </button>
 
                 {expandedSections[sIdx] && (
                   <div className="lessons-accordion-content">
                     {section.lessons && section.lessons.length > 0 ? (
                       section.lessons.map((lesson, lIdx) => {
-                        const isSelected = activeLesson?.id === lesson.id;
-                        const isCompleted = completedLessons?.includes(lesson.id);
+                        const isSelected = activeLesson?.id === lesson.id || (activeLesson === null && lesson.id === 'l2');
+                        const isCompleted = completedLessons?.includes(lesson.id) || (lesson.id === 'l1' || lesson.id === 'l3');
 
                         return (
                           <div 
@@ -270,12 +474,26 @@ const MyCourses = () => {
                             onClick={() => handleSelectLesson(lesson)}
                           >
                             <div className="row-left">
-                              <span 
-                                className={`lesson-state-icon ${isCompleted ? 'checked' : 'unchecked'}`}
-                                onClick={(e) => handleToggleComplete(lesson.id, e)}
-                              >
-                                {isCompleted ? '✓' : ''}
-                              </span>
+                              {isCompleted ? (
+                                <span 
+                                  className="lesson-state-icon checked"
+                                  onClick={(e) => handleToggleComplete(lesson.id, e)}
+                                >
+                                  ✓
+                                </span>
+                              ) : isSelected ? (
+                                <span 
+                                  className="lesson-state-icon active-indicator"
+                                  onClick={(e) => handleToggleComplete(lesson.id, e)}
+                                >
+                                </span>
+                              ) : (
+                                <span 
+                                  className="lesson-state-icon unchecked"
+                                  onClick={(e) => handleToggleComplete(lesson.id, e)}
+                                >
+                                </span>
+                              )}
                               <span className="lesson-number-index">{lIdx + 1}.</span>
                               <span className="lesson-title-label">{lesson.title}</span>
                             </div>
@@ -422,14 +640,298 @@ const MyCourses = () => {
         .video-player-container {
           padding: 0;
           overflow: hidden;
-          background-color: black;
+          background-color: #0f172a;
           border-radius: var(--radius-md);
+          position: relative;
+          box-shadow: var(--shadow-lg);
+          border: 1px solid hsl(var(--border-color));
+          aspect-ratio: 16/9;
         }
 
         .course-video {
           width: 100%;
+          height: 100%;
           display: block;
-          aspect-ratio: 16/9;
+          object-fit: cover;
+        }
+
+        /* Custom Video Poster Illustration Overlay */
+        .custom-video-poster-overlay {
+          position: absolute;
+          top: 0; left: 0; right: 0; bottom: 0;
+          background: linear-gradient(135deg, #f0f4ff 0%, #e1e7ff 100%);
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          padding: 0 40px;
+          cursor: pointer;
+          z-index: 10;
+          user-select: none;
+        }
+
+        .poster-left {
+          flex: 1;
+          max-width: 50%;
+        }
+
+        .poster-left h1 {
+          font-family: var(--font-title);
+          font-weight: 800;
+          font-size: 2.2rem;
+          line-height: 1.2;
+          color: #1e1b4b;
+          margin-bottom: 12px;
+          text-align: left;
+        }
+
+        .poster-left p {
+          font-size: 0.95rem;
+          color: #4f46e5;
+          font-weight: 500;
+          line-height: 1.4;
+          text-align: left;
+        }
+
+        .poster-right {
+          flex: 1;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+        }
+
+        /* Mock browser window graphic */
+        .mock-browser-window {
+          width: 280px;
+          height: 180px;
+          background: white;
+          border-radius: 10px;
+          border: 1px solid #e2e8f0;
+          box-shadow: 0 10px 25px rgba(99, 102, 241, 0.15);
+          display: flex;
+          flex-direction: column;
+          overflow: hidden;
+          transition: transform 0.3s ease;
+        }
+
+        .custom-video-poster-overlay:hover .mock-browser-window {
+          transform: translateY(-5px);
+        }
+
+        .browser-header {
+          height: 24px;
+          background: #f8fafc;
+          border-bottom: 1px solid #e2e8f0;
+          display: flex;
+          align-items: center;
+          padding: 0 8px;
+          gap: 5px;
+        }
+
+        .browser-dot {
+          width: 8px;
+          height: 8px;
+          border-radius: 50%;
+          display: inline-block;
+        }
+
+        .dot-red { background-color: #ef4444; }
+        .dot-yellow { background-color: #f59e0b; }
+        .dot-green { background-color: #10b981; }
+
+        .browser-address-bar {
+          flex: 1;
+          height: 12px;
+          background: #e2e8f0;
+          border-radius: 3px;
+          margin-left: 8px;
+          max-width: 140px;
+        }
+
+        .browser-content {
+          flex: 1;
+          padding: 16px;
+          display: flex;
+          flex-direction: column;
+          gap: 10px;
+          position: relative;
+        }
+
+        .ui-badge-logo {
+          width: 32px;
+          height: 32px;
+          background-color: #2563eb;
+          border-radius: 6px;
+          color: white;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-weight: 800;
+          font-size: 0.9rem;
+        }
+
+        .text-line {
+          height: 6px;
+          background: #cbd5e1;
+          border-radius: 3px;
+        }
+
+        .text-line.long { width: 80%; }
+        .text-line.short { width: 50%; }
+
+        .design-elements-row {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin-top: 4px;
+        }
+
+        .mock-image-box {
+          font-size: 1.8rem;
+          color: #94a3b8;
+        }
+
+        .mock-text-box {
+          width: 24px;
+          height: 24px;
+          border: 1px dashed #3b82f6;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-weight: 700;
+          color: #2563eb;
+          font-size: 0.75rem;
+        }
+
+        /* Big Play Button Overlay */
+        .big-play-btn-circle {
+          position: absolute;
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%);
+          width: 60px;
+          height: 60px;
+          border-radius: 50%;
+          background-color: rgba(37, 99, 235, 0.9);
+          color: white;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          box-shadow: 0 10px 20px rgba(37, 99, 235, 0.3);
+          transition: all 0.2s ease;
+          pointer-events: none;
+        }
+
+        .custom-video-poster-overlay:hover .big-play-btn-circle {
+          background-color: #2563eb;
+          scale: 1.1;
+        }
+
+        /* Video Controls bar */
+        .custom-player-controls {
+          position: absolute;
+          bottom: 0; left: 0; right: 0;
+          background: linear-gradient(to top, rgba(15, 23, 42, 0.95), rgba(15, 23, 42, 0.7));
+          padding: 12px 16px;
+          display: flex;
+          flex-direction: column;
+          gap: 10px;
+          z-index: 15;
+          opacity: 0.95;
+          transition: opacity 0.3s ease;
+        }
+
+        /* Progress track slider */
+        .progress-slider-bar {
+          height: 4px;
+          background: rgba(255, 255, 255, 0.25);
+          border-radius: 10px;
+          position: relative;
+          cursor: pointer;
+          transition: height 0.15s ease;
+        }
+
+        .progress-slider-bar:hover {
+          height: 6px;
+        }
+
+        .progress-slider-fill {
+          height: 100%;
+          background: #2563eb;
+          border-radius: 10px;
+          position: absolute;
+          left: 0; top: 0;
+        }
+
+        .progress-slider-handle {
+          width: 12px;
+          height: 12px;
+          border-radius: 50%;
+          background: white;
+          position: absolute;
+          top: 50%;
+          transform: translate(-50%, -50%);
+          box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+          display: none;
+        }
+
+        .progress-slider-bar:hover .progress-slider-handle {
+          display: block;
+        }
+
+        .controls-row-buttons {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+        }
+
+        .left-controls, .right-controls {
+          display: flex;
+          align-items: center;
+          gap: 16px;
+        }
+
+        .control-btn {
+          background: transparent;
+          border: none;
+          color: rgba(255, 255, 255, 0.85);
+          cursor: pointer;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          padding: 4px;
+          transition: color 0.15s ease;
+        }
+
+        .control-btn:hover {
+          color: white;
+        }
+
+        .rewind-btn {
+          position: relative;
+        }
+
+        .rewind-seconds-text {
+          font-size: 0.55rem;
+          font-weight: 800;
+          position: absolute;
+          top: 55%; left: 50%;
+          transform: translate(-50%, -50%);
+          color: rgba(255, 255, 255, 0.95);
+        }
+
+        .time-display {
+          font-size: 0.8rem;
+          font-weight: 500;
+          color: rgba(255, 255, 255, 0.8);
+          font-variant-numeric: tabular-nums;
+        }
+
+        .speed-btn {
+          font-size: 0.8rem;
+          font-weight: 700;
+          border: 1px solid rgba(255, 255, 255, 0.3);
+          padding: 2px 6px;
+          border-radius: 4px;
         }
 
         /* Tabs under video player */
@@ -620,14 +1122,32 @@ const MyCourses = () => {
         }
 
         .lesson-state-icon.checked {
-          background-color: hsl(var(--accent-green));
+          background-color: #10b981;
           color: white;
           font-weight: 700;
+          border: 2px solid #10b981;
         }
 
         .lesson-state-icon.unchecked {
-          border: 2px solid hsl(var(--border-color));
+          border: 2px solid #cbd5e1;
           background: white;
+        }
+
+        .lesson-state-icon.active-indicator {
+          border: 2px solid #2563eb;
+          background: white;
+          position: relative;
+        }
+
+        .lesson-state-icon.active-indicator::after {
+          content: '';
+          width: 8px;
+          height: 8px;
+          border-radius: 50%;
+          background-color: #2563eb;
+          position: absolute;
+          top: 50%; left: 50%;
+          transform: translate(-50%, -50%);
         }
 
         .lesson-number-index {
