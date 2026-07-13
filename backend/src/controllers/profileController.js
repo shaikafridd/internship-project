@@ -39,6 +39,7 @@ exports.getProfile = async (req, res, next) => {
         atsResults: user.atsResults,
         atsFeedback: user.atsFeedback,
         photoUrl: user.photoUrl,
+        resumeUploaded: user.resumeUploaded,
         education: user.education || [],
         experience: user.experience || [],
         achievements: user.achievements,
