@@ -3,16 +3,15 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
 const AdminLogin = () => {
-  const { adminLogin, adminSetup } = useAuth();
+  const { adminLogin } = useAuth();
   const navigate = useNavigate();
 
   // Form states
-  const [name, setName] = useState('');
+  const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formError, setFormError] = useState('');
   const [successMsg, setSuccessMsg] = useState('');
-  const [isFirstTime, setIsFirstTime] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -32,28 +31,11 @@ const AdminLogin = () => {
           navigate('/admin/dashboard');
         }, 800);
       } else {
-        // Regular login
-        res = await adminLogin(name, password);
-        if (res.user && res.user.role === 'admin') {
-          setSuccessMsg('Admin authentication successful! Access granted...');
-          setTimeout(() => {
-            navigate('/admin/dashboard');
-          }, 800);
-        } else {
-          setFormError('Access Denied: You are not authorized as an Administrator.');
-          setIsSubmitting(false);
-        }
+        setFormError('Access Denied: You are not authorized as an Administrator.');
+        setIsSubmitting(false);
       }
     } catch (err) {
-      const message = err.message || 'Invalid admin credentials';
-
-      // If error mentions admin already exists, switch to login mode
-      if (message.includes('already exists')) {
-        setFormError('Admin account exists. Please log in instead.');
-        setIsFirstTime(false);
-      } else {
-        setFormError(message);
-      }
+      setFormError(err.message || 'Invalid admin credentials');
       setIsSubmitting(false);
     }
   };
@@ -109,7 +91,7 @@ const AdminLogin = () => {
           <div className="auth-form-header" style={{ marginBottom: '30px' }}>
             <h3 style={{ color: 'white', fontSize: '1.8rem', fontWeight: 800, margin: '0 0 8px' }}>Welcome back, Admin!</h3>
             <p style={{ color: '#94a3b8', fontSize: '0.9rem', margin: 0 }}>
-              {isFirstTime ? 'Create your admin account' : 'Verify credentials to access admin dashboard'}
+              Verify credentials to access admin dashboard
             </p>
           </div>
 
@@ -169,19 +151,9 @@ const AdminLogin = () => {
             </div>
 
             <button type="submit" className="btn btn-primary" style={{ width: '100%', padding: '12px', background: '#2563eb', border: 'none', borderRadius: '6px', color: 'white', fontSize: '0.95rem', fontWeight: '700', cursor: 'pointer', transition: 'all 0.2s' }} disabled={isSubmitting}>
-              {isSubmitting ? (isFirstTime ? 'Creating admin account...' : 'Verifying system credentials...') : (isFirstTime ? 'Create Admin Account' : 'Enter System Admin Panel')}
+              {isSubmitting ? 'Verifying system credentials...' : 'Enter System Admin Panel'}
             </button>
           </form>
-
-          <div style={{ marginTop: '20px', textAlign: 'center' }}>
-            <button
-              type="button"
-              onClick={() => { setIsFirstTime(!isFirstTime); setFormError(''); }}
-              style={{ background: 'none', border: 'none', color: '#2563eb', cursor: 'pointer', fontSize: '0.9rem', textDecoration: 'underline' }}
-            >
-              {isFirstTime ? 'Already have an admin account? Log in' : 'First time? Create admin account'}
-            </button>
-          </div>
 
         </div>
       </div>
