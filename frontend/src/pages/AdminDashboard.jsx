@@ -1,6 +1,22 @@
 import React, { useState, useEffect } from 'react';
+import { adminAPI } from '../services/api';
 
 const AdminDashboard = () => {
+  const [stats, setStats] = useState(null);
+
+  useEffect(() => {
+    const fetchAdminStats = async () => {
+      try {
+        const res = await adminAPI.getDashboard();
+        if (res.success && res.data) {
+          setStats(res.data.stats);
+        }
+      } catch (err) {
+        console.error('Failed to load admin stats from backend:', err);
+      }
+    };
+    fetchAdminStats();
+  }, []);
 
   // State Management for Courses (Persistent in LocalStorage)
   const [courses, setCourses] = useState(() => {
@@ -106,7 +122,7 @@ const AdminDashboard = () => {
             <div className="stat-icon icon-blue">👥</div>
             <div className="stat-desc">
               <span>Total Students</span>
-              <h3>12,845</h3>
+              <h3>{stats?.totalStudents?.toLocaleString('en-IN') || '12,845'}</h3>
               <span className="trend-green">↑ 12.5% <span className="trend-lbl">vs last week</span></span>
             </div>
           </div>
@@ -115,7 +131,7 @@ const AdminDashboard = () => {
             <div className="stat-icon icon-green">📖</div>
             <div className="stat-desc">
               <span>Active Courses</span>
-              <h3>{courses.length}</h3>
+              <h3>{stats?.activeCourses || courses.length}</h3>
               <span className="trend-green">↑ 8.3% <span className="trend-lbl">vs last week</span></span>
             </div>
           </div>
@@ -124,7 +140,7 @@ const AdminDashboard = () => {
             <div className="stat-icon icon-purple">🎓</div>
             <div className="stat-desc">
               <span>Total Enrollments</span>
-              <h3>25,671</h3>
+              <h3>{stats?.totalEnrollments?.toLocaleString('en-IN') || '25,671'}</h3>
               <span className="trend-green">↑ 15.7% <span className="trend-lbl">vs last week</span></span>
             </div>
           </div>
@@ -133,7 +149,7 @@ const AdminDashboard = () => {
             <div className="stat-icon icon-orange">💰</div>
             <div className="stat-desc">
               <span>Total Revenue</span>
-              <h3>{formatCurrency(1860000 + totalRevenueNumber)}</h3>
+              <h3>{stats?.totalRevenue ? formatCurrency(stats.totalRevenue) : formatCurrency(1860000 + totalRevenueNumber)}</h3>
               <span className="trend-green">↑ 18.6% <span className="trend-lbl">vs last week</span></span>
             </div>
           </div>
@@ -142,7 +158,7 @@ const AdminDashboard = () => {
             <div className="stat-icon icon-red">💳</div>
             <div className="stat-desc">
               <span>Pending Payouts</span>
-              <h3>₹2,45,300</h3>
+              <h3>{stats?.pendingPayouts ? formatCurrency(stats.pendingPayouts) : '₹2,45,300'}</h3>
               <span className="trend-red">↓ 3.2% <span className="trend-lbl">vs last week</span></span>
             </div>
           </div>
@@ -161,7 +177,7 @@ const AdminDashboard = () => {
               </select>
             </div>
             <div className="revenue-large-summary">
-              <h2>{formatCurrency(1860000 + totalRevenueNumber)}</h2>
+              <h2>{stats?.totalRevenue ? formatCurrency(stats.totalRevenue) : formatCurrency(1860000 + totalRevenueNumber)}</h2>
               <span className="trend-green">↑ 18.6% vs last week</span>
             </div>
 
@@ -263,11 +279,11 @@ const AdminDashboard = () => {
             <div className="payments-mini-stats-grid">
               <div className="payments-stat-sub-card">
                 <span>Total Payments</span>
-                <h4>{formatCurrency(1860000 + totalRevenueNumber)}</h4>
+                <h4>{stats?.totalRevenue ? formatCurrency(stats.totalRevenue) : formatCurrency(1860000 + totalRevenueNumber)}</h4>
               </div>
               <div className="payments-stat-sub-card border-green">
                 <span>Successful Payments</span>
-                <h4 style={{ color: '#10b981' }}>{formatCurrency(1630000 + totalRevenueNumber)}</h4>
+                <h4 style={{ color: '#10b981' }}>{stats?.totalRevenue ? formatCurrency(stats.totalRevenue - 230000) : formatCurrency(1630000 + totalRevenueNumber)}</h4>
               </div>
               <div className="payments-stat-sub-card border-yellow">
                 <span>Refunds</span>
@@ -275,7 +291,7 @@ const AdminDashboard = () => {
               </div>
               <div className="payments-stat-sub-card border-red">
                 <span>Pending Payouts</span>
-                <h4 style={{ color: '#ef4444' }}>₹2,45,300</h4>
+                <h4 style={{ color: '#ef4444' }}>{stats?.pendingPayouts ? formatCurrency(stats.pendingPayouts) : '₹2,45,300'}</h4>
               </div>
             </div>
 
