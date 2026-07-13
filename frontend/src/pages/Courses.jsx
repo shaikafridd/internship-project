@@ -1,16 +1,22 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { coursesAPI } from '../services/api';
 
 const Courses = () => {
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [courses, setCourses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
   // Filtering states
-  const [search, setSearch] = useState('');
+  const urlSearch = searchParams.get('search') || '';
+  const [search, setSearch] = useState(urlSearch);
   const [category, setCategory] = useState('All');
+
+  useEffect(() => {
+    setSearch(urlSearch);
+  }, [urlSearch]);
 
   useEffect(() => {
     const fetchCourses = async () => {
@@ -82,7 +88,18 @@ const Courses = () => {
             className="search-input"
             placeholder="Search courses, instructors, keywords..."
             value={search}
-            onChange={(e) => setSearch(e.target.value)}
+            onChange={(e) => {
+              const val = e.target.value;
+              setSearch(val);
+              setSearchParams(prev => {
+                if (val) {
+                  prev.set('search', val);
+                } else {
+                  prev.delete('search');
+                }
+                return prev;
+              }, { replace: true });
+            }}
           />
         </div>
 
