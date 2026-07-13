@@ -91,7 +91,7 @@ const AdminLogin = () => {
           <div className="auth-form-header" style={{ marginBottom: '30px' }}>
             <h3 style={{ color: 'white', fontSize: '1.8rem', fontWeight: 800, margin: '0 0 8px' }}>Welcome back, Admin!</h3>
             <p style={{ color: '#94a3b8', fontSize: '0.9rem', margin: 0 }}>
-              {isFirstTime ? 'Create your admin account' : 'Verify credentials to access admin dashboard'}
+              Verify credentials to access admin dashboard
             </p>
           </div>
 
