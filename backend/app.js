@@ -29,11 +29,13 @@ app.use(cors());
 // Body parser
 app.use(express.json());
 
-// Standard logging middleware
-app.use((req, res, next) => {
-  console.log(`${req.method} ${req.originalUrl}`);
-  next();
-});
+// Standard logging middleware (only in development to avoid production logging overhead)
+if (process.env.NODE_ENV === 'development') {
+  app.use((req, res, next) => {
+    console.log(`${req.method} ${req.originalUrl}`);
+    next();
+  });
+}
 
 // Mount routers
 app.use('/api/auth', authRoutes);
