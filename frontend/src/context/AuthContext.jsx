@@ -1,5 +1,5 @@
 import React, { createContext, useState, useEffect, useContext } from 'react';
-import { authAPI, adminAPI } from '../services/api';
+import { authAPI } from '../services/api';
 
 const AuthContext = createContext(null);
 
@@ -11,29 +11,6 @@ export const AuthProvider = ({ children }) => {
   // Load user data on startup if token exists
   useEffect(() => {
     const loadUser = async () => {
-      // Check for admin session first
-      const adminToken = localStorage.getItem('admin_token');
-      if (adminToken) {
-        try {
-          const res = await adminAPI.getDashboard();
-          if (res.success && res.data) {
-            setUser({
-              id: res.data.adminId,
-              name: 'Admin',
-              username: res.data.username,
-              role: 'admin',
-            });
-          } else {
-            localStorage.removeItem('admin_token');
-          }
-        } catch (err) {
-          console.error('Admin token invalid, clearing session', err.message);
-          localStorage.removeItem('admin_token');
-        } finally {
-          setLoading(false);
-        }
-        return;
-      }
       try {
         const res = await authAPI.getMe();
         if (res.success && res.data) {
@@ -63,28 +40,6 @@ export const AuthProvider = ({ children }) => {
         return res;
       } else {
         throw new Error(res.message || 'Login failed');
-      }
-    } catch (err) {
-      setError(err.message);
-      throw err;
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // Admin login handler — calls dedicated /api/admin/login endpoint
-  const adminLogin = async (username, password) => {
-    setError(null);
-    setLoading(true);
-    try {
-      const res = await adminAPI.login(username, password);
-      if (res.success && res.token) {
-        // Store admin JWT under a separate key to avoid collision with user token
-        localStorage.setItem('admin_token', res.token);
-        setUser({ ...res.user, name: 'Admin' });
-        return res;
-      } else {
-        throw new Error(res.message || 'Admin login failed');
       }
     } catch (err) {
       setError(err.message);
@@ -160,7 +115,6 @@ export const AuthProvider = ({ children }) => {
   // Logout handler
   const logout = () => {
     localStorage.removeItem('token');
-    localStorage.removeItem('admin_token');
     setUser(null);
   };
 

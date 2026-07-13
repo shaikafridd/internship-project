@@ -16,7 +16,7 @@ const AdminLogin = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!username || !password) {
+    if (!name || !password) {
       setFormError('Please fill in all fields');
       return;
     }
@@ -25,29 +25,26 @@ const AdminLogin = () => {
     setIsSubmitting(true);
 
     try {
-      const res = await adminLogin(username.trim(), password);
+      const res = isFirstTime
+        ? await adminSetup(name.trim(), password)
+        : await adminLogin(name.trim(), password);
+
       if (res && res.user && res.user.role === 'admin') {
-        setSuccessMsg('Admin authentication successful! Access granted...');
+        setSuccessMsg(
+          isFirstTime
+            ? 'Admin account created! Access granted...'
+            : 'Admin authentication successful! Access granted...'
+        );
         setTimeout(() => {
           navigate('/admin/dashboard');
         }, 800);
       } else {
-        // Regular login
-        res = await adminLogin(name, password);
-        if (res.user && res.user.role === 'admin') {
-          setSuccessMsg('Admin authentication successful! Access granted...');
-          setTimeout(() => {
-            navigate('/admin/dashboard');
-          }, 800);
-        } else {
-          setFormError('Access Denied: You are not authorized as an Administrator.');
-          setIsSubmitting(false);
-        }
+        setFormError('Access Denied: You are not authorized as an Administrator.');
+        setIsSubmitting(false);
       }
     } catch (err) {
       const message = err.message || 'Invalid admin credentials';
 
-      // If error mentions admin already exists, switch to login mode
       if (message.includes('already exists')) {
         setFormError('Admin account exists. Please log in instead.');
         setIsFirstTime(false);
@@ -61,7 +58,6 @@ const AdminLogin = () => {
   return (
     <div className="auth-split-container animate-fade-in" style={{ background: '#0f172a', minHeight: '100vh', display: 'flex' }}>
 
-      {/* Left Column: Brand Pitch */}
       <div className="auth-pitch-side" style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center', padding: '60px', background: 'rgba(255,255,255,0.01)', borderRight: '1px solid rgba(255,255,255,0.05)' }}>
         <div className="auth-pitch-header" style={{ marginBottom: '40px' }}>
           <div className="logo" style={{ color: 'white', display: 'flex', alignItems: 'center', gap: '10px', fontSize: '1.5rem' }}>
@@ -102,7 +98,6 @@ const AdminLogin = () => {
         </div>
       </div>
 
-      {/* Right Column: Login Card Form */}
       <div className="auth-form-side" style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '40px' }}>
         <div className="auth-form-card glass-panel" style={{ width: '100%', maxWidth: '440px', padding: '40px', background: 'rgba(255, 255, 255, 0.02)', border: '1px solid rgba(255, 255, 255, 0.06)', borderRadius: '12px', color: 'white' }}>
 
@@ -138,8 +133,8 @@ const AdminLogin = () => {
                   type="text"
                   className="form-control"
                   placeholder="admin"
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value)}
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
                   required
                   autoComplete="username"
                   disabled={isSubmitting}
