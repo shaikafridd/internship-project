@@ -40,6 +40,8 @@ api.interceptors.response.use(
 export const authAPI = {
   signup: (name, email, password) => api.post('/auth/signup', { name, email, password }),
   login: (email, password) => api.post('/auth/login', { email, password }),
+  adminLogin: (name, password) => api.post('/auth/admin/login', { name, password }),
+  adminSetup: (name, password) => api.post('/auth/admin/setup', { name, password }),
   forgotPassword: (email) => api.post('/auth/forgotpassword', { email }),
   resetPassword: (token, password) => api.put(`/auth/resetpassword/${token}`, { password }),
   getMe: () => api.get('/auth/me'),
@@ -65,9 +67,9 @@ export const myCoursesAPI = {
 
 // Payments & Checkout Endpoints
 export const paymentAPI = {
-  checkout: (courseId, discountCode = '', paymentMethod = 'Card') => 
+  checkout: (courseId, discountCode = '', paymentMethod = 'Card') =>
     api.post('/payments/checkout', { courseId, discountCode, paymentMethod }),
-  verifyPayment: (orderId, paymentStatus) => 
+  verifyPayment: (orderId, paymentStatus) =>
     api.post('/payments/verify', { orderId, paymentStatus }),
 };
 

@@ -263,3 +263,85 @@ exports.getMe = async (req, res, next) => {
     });
   }
 };
+
+// @desc    Admin Login
+// @route   POST /api/auth/admin/login
+// @access  Public
+exports.loginAdmin = async (req, res, next) => {
+  try {
+    const { name, password } = req.body;
+
+    if (!name || !password) {
+      return res.status(400).json({
+        success: false,
+        message: 'Please provide admin name and password',
+      });
+    }
+
+    const user = await User.findOne({ name, role: 'admin' }).select('+password');
+
+    if (!user) {
+      return res.status(401).json({
+        success: false,
+        message: 'Invalid admin credentials',
+      });
+    }
+
+    const isMatch = await user.matchPassword(password);
+    if (!isMatch) {
+      return res.status(401).json({
+        success: false,
+        message: 'Invalid admin credentials',
+      });
+    }
+
+    sendTokenResponse(user, 200, res);
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+// @desc    Admin Setup (First-time admin account creation)
+// @route   POST /api/auth/admin/setup
+// @access  Public
+exports.setupAdmin = async (req, res, next) => {
+  try {
+    const { name, password } = req.body;
+
+    if (!name || !password) {
+      return res.status(400).json({
+        success: false,
+        message: 'Please provide admin name and password',
+      });
+    }
+
+    // Check if any admin exists
+    const existingAdmin = await User.findOne({ role: 'admin' });
+
+    if (existingAdmin) {
+      return res.status(400).json({
+        success: false,
+        message: 'Admin account already exists. Use login instead.',
+      });
+    }
+
+    // Create admin account
+    const sanitizedEmailPrefix = name.toLowerCase().replace(/[^a-z0-9._%+-]/g, '');
+    const user = await User.create({
+      name,
+      email: `${sanitizedEmailPrefix}@admin.careerhub.local`,
+      password,
+      role: 'admin',
+    });
+
+    sendTokenResponse(user, 201, res);
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};

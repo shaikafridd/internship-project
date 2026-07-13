@@ -16,11 +16,6 @@ export const AuthProvider = ({ children }) => {
         setLoading(false);
         return;
       }
-      if (token === 'mock-admin-token') {
-        setUser({ id: 'admin-id', name: 'Admin', email: 'admin@careerhub.com', role: 'admin' });
-        setLoading(false);
-        return;
-      }
       try {
         const res = await authAPI.getMe();
         if (res.success && res.data) {
@@ -43,15 +38,6 @@ export const AuthProvider = ({ children }) => {
     setError(null);
     setLoading(true);
     try {
-      // Mock Admin Credentials Override
-      if (email === 'admin@careerhub.com' && password === 'adminpassword') {
-        localStorage.setItem('token', 'mock-admin-token');
-        const mockAdmin = { id: 'admin-id', name: 'Admin', email: 'admin@careerhub.com', role: 'admin' };
-        setUser(mockAdmin);
-        setLoading(false);
-        return { success: true, user: mockAdmin, token: 'mock-admin-token' };
-      }
-
       const res = await authAPI.login(email, password);
       if (res.success && res.token) {
         localStorage.setItem('token', res.token);
@@ -89,6 +75,48 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  // Admin login handler
+  const adminLogin = async (name, password) => {
+    setError(null);
+    setLoading(true);
+    try {
+      const res = await authAPI.adminLogin(name, password);
+      if (res.success && res.token) {
+        localStorage.setItem('token', res.token);
+        setUser(res.user);
+        return res;
+      } else {
+        throw new Error(res.message || 'Admin login failed');
+      }
+    } catch (err) {
+      setError(err.message);
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Admin setup handler (first-time admin account creation)
+  const adminSetup = async (name, password) => {
+    setError(null);
+    setLoading(true);
+    try {
+      const res = await authAPI.adminSetup(name, password);
+      if (res.success && res.token) {
+        localStorage.setItem('token', res.token);
+        setUser(res.user);
+        return res;
+      } else {
+        throw new Error(res.message || 'Admin setup failed');
+      }
+    } catch (err) {
+      setError(err.message);
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  };
+
   // Logout handler
   const logout = () => {
     localStorage.removeItem('token');
@@ -114,6 +142,8 @@ export const AuthProvider = ({ children }) => {
     loading,
     error,
     login,
+    adminLogin,
+    adminSetup,
     signup,
     logout,
     reloadUser,

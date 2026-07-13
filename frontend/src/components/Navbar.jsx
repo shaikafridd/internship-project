@@ -9,7 +9,6 @@ const Navbar = ({ toggleSidebar }) => {
 
   const isCourseView = location.pathname.startsWith('/my-courses');
   const isProfileView = location.pathname.startsWith('/profile');
-  const isDashboardView = location.pathname.startsWith('/dashboard');
 
   return (
     <header className="navbar">

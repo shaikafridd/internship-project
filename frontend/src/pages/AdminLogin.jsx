@@ -3,19 +3,20 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
 const AdminLogin = () => {
-  const { login } = useAuth();
+  const { adminLogin, adminSetup } = useAuth();
   const navigate = useNavigate();
 
   // Form states
-  const [email, setEmail] = useState('admin@careerhub.com');
-  const [password, setPassword] = useState('adminpassword');
+  const [name, setName] = useState('');
+  const [password, setPassword] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formError, setFormError] = useState('');
   const [successMsg, setSuccessMsg] = useState('');
+  const [isFirstTime, setIsFirstTime] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!email || !password) {
+    if (!name || !password) {
       setFormError('Please fill in all fields');
       return;
     }
@@ -24,18 +25,42 @@ const AdminLogin = () => {
     setIsSubmitting(true);
 
     try {
-      const res = await login(email, password);
-      if (res.user && res.user.role === 'admin') {
-        setSuccessMsg('Admin authentication successful! Access granted...');
-        setTimeout(() => {
-          navigate('/admin/dashboard');
-        }, 800);
+      let res;
+      
+      if (isFirstTime) {
+        // First time setup
+        res = await adminSetup(name, password);
+        if (res.success && res.user && res.user.role === 'admin') {
+          setSuccessMsg('Admin account created successfully! Redirecting to dashboard...');
+          setTimeout(() => {
+            navigate('/admin/dashboard');
+          }, 800);
+        } else {
+          throw new Error('Failed to create admin account');
+        }
       } else {
-        setFormError('Access Denied: You are not authorized as an Administrator.');
-        setIsSubmitting(false);
+        // Regular login
+        res = await adminLogin(name, password);
+        if (res.user && res.user.role === 'admin') {
+          setSuccessMsg('Admin authentication successful! Access granted...');
+          setTimeout(() => {
+            navigate('/admin/dashboard');
+          }, 800);
+        } else {
+          setFormError('Access Denied: You are not authorized as an Administrator.');
+          setIsSubmitting(false);
+        }
       }
     } catch (err) {
-      setFormError(err.message || 'Invalid admin credentials');
+      const message = err.message || 'Invalid admin credentials';
+      
+      // If error mentions admin already exists, switch to login mode
+      if (message.includes('already exists')) {
+        setFormError('Admin account exists. Please log in instead.');
+        setIsFirstTime(false);
+      } else {
+        setFormError(message);
+      }
       setIsSubmitting(false);
     }
   };
@@ -90,7 +115,9 @@ const AdminLogin = () => {
           
           <div className="auth-form-header" style={{ marginBottom: '30px' }}>
             <h3 style={{ color: 'white', fontSize: '1.8rem', fontWeight: 800, margin: '0 0 8px' }}>Welcome back, Admin!</h3>
-            <p style={{ color: '#94a3b8', fontSize: '0.9rem', margin: 0 }}>Verify credentials to access admin dashboard</p>
+            <p style={{ color: '#94a3b8', fontSize: '0.9rem', margin: 0 }}>
+              {isFirstTime ? 'Create your admin account' : 'Verify credentials to access admin dashboard'}
+            </p>
           </div>
 
           {formError && (
@@ -107,18 +134,18 @@ const AdminLogin = () => {
 
           <form onSubmit={handleSubmit}>
             <div className="form-group" style={{ marginBottom: '20px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
-              <label className="form-label" style={{ color: '#cbd5e1', fontSize: '0.85rem', fontWeight: 600 }}>Admin Email Address</label>
+              <label className="form-label" style={{ color: '#cbd5e1', fontSize: '0.85rem', fontWeight: 600 }}>Admin Name</label>
               <div className="input-container-icon" style={{ position: 'relative' }}>
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', color: '#64748b' }}>
-                  <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
-                  <polyline points="22,6 12,13 2,6" />
+                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                  <circle cx="12" cy="7" r="4" />
                 </svg>
                 <input
-                  type="email"
+                  type="text"
                   className="form-control"
-                  placeholder="admin@careerhub.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="Enter admin name"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
                   required
                   disabled={isSubmitting}
                   style={{ width: '100%', background: 'rgba(255,255,255,0.04)', color: 'white', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '6px', padding: '12px 12px 12px 42px', fontSize: '0.9rem', outline: 'none' }}
@@ -147,9 +174,19 @@ const AdminLogin = () => {
             </div>
 
             <button type="submit" className="btn btn-primary" style={{ width: '100%', padding: '12px', background: '#2563eb', border: 'none', borderRadius: '6px', color: 'white', fontSize: '0.95rem', fontWeight: '700', cursor: 'pointer', transition: 'all 0.2s' }} disabled={isSubmitting}>
-              {isSubmitting ? 'Verifying system credentials...' : 'Enter System Admin Panel'}
+              {isSubmitting ? (isFirstTime ? 'Creating admin account...' : 'Verifying system credentials...') : (isFirstTime ? 'Create Admin Account' : 'Enter System Admin Panel')}
             </button>
           </form>
+
+          <div style={{ marginTop: '20px', textAlign: 'center' }}>
+            <button 
+              type="button"
+              onClick={() => { setIsFirstTime(!isFirstTime); setFormError(''); }}
+              style={{ background: 'none', border: 'none', color: '#2563eb', cursor: 'pointer', fontSize: '0.9rem', textDecoration: 'underline' }}
+            >
+              {isFirstTime ? 'Already have an admin account? Log in' : 'First time? Create admin account'}
+            </button>
+          </div>
 
         </div>
       </div>

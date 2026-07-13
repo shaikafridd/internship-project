@@ -25,6 +25,11 @@ const UserSchema = new mongoose.Schema({
     minlength: [6, 'Password must be at least 6 characters'],
     select: false, // Exclude password from query results by default
   },
+  role: {
+    type: String,
+    enum: ['user', 'admin'],
+    default: 'user',
+  },
   phone: {
     type: String,
     default: '',
@@ -112,7 +117,7 @@ const UserSchema = new mongoose.Schema({
 });
 
 // Encrypt password using bcryptjs
-UserSchema.pre('save', async function() {
+UserSchema.pre('save', async function () {
   if (!this.isModified('password')) {
     return;
   }
@@ -121,12 +126,12 @@ UserSchema.pre('save', async function() {
 });
 
 // Match user entered password to hashed password in database
-UserSchema.methods.matchPassword = async function(enteredPassword) {
+UserSchema.methods.matchPassword = async function (enteredPassword) {
   return await bcrypt.compare(enteredPassword, this.password);
 };
 
 // Generate and hash password token
-UserSchema.methods.getResetPasswordToken = function() {
+UserSchema.methods.getResetPasswordToken = function () {
   // Generate token
   const resetToken = crypto.randomBytes(20).toString('hex');
 

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate, Link } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { myCoursesAPI } from '../services/api';
 
 const MyCourses = () => {
@@ -22,9 +22,8 @@ const MyCourses = () => {
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
   const [playbackSpeed, setPlaybackSpeed] = useState(1);
-  const [volume, setVolume] = useState(0.8);
+  const [volume] = useState(0.8);
   const [isMuted, setIsMuted] = useState(false);
-  const [isFullscreen, setIsFullscreen] = useState(false);
 
   const togglePlay = () => {
     if (!videoRef.current) return;
@@ -108,6 +107,7 @@ const MyCourses = () => {
 
   useEffect(() => {
     fetchEnrollment();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [courseId]);
 
   const toggleSection = (index) => {
@@ -161,7 +161,7 @@ const MyCourses = () => {
     );
   }
 
-  const { course, progress, completedLessons, status } = enrollment;
+  const { course, progress, completedLessons } = enrollment;
 
   return (
     <div className="course-player-wrapper animate-fade-in">

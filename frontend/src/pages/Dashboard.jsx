@@ -255,12 +255,8 @@ const Dashboard = () => {
             </div>
 
             <div className="tasks-checklist">
-              {(upcomingTasks && upcomingTasks.length > 0 ? upcomingTasks : [
-                { _id: '1', title: 'React Assignment', dueString: 'Due in 2 days' },
-                { _id: '2', title: 'Python Quiz', dueString: 'Due in 5 days' },
-                { _id: '3', title: 'UI/UX Project', dueString: 'Due in 6 days' },
-                { _id: '4', title: 'Mock Interview', dueString: 'Tomorrow 10:00 AM' }
-              ]).map((task) => (
+              {upcomingTasks && upcomingTasks.length > 0 ? (
+                upcomingTasks.map((task) => (
                 <div key={task._id} className="task-row-item">
                   <div className="task-row-marker">
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="task-checkbox-svg">
@@ -273,7 +269,12 @@ const Dashboard = () => {
                   </div>
                   <span className="arrow-details">&gt;</span>
                 </div>
-              ))}
+                ))
+              ) : (
+                <div style={{ padding: '16px', textAlign: 'center', color: 'hsl(var(--text-muted))' }}>
+                  <p>No upcoming tasks</p>
+                </div>
+              )}
             </div>
           </div>
 

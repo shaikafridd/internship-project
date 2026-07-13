@@ -1,15 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
 
 const AdminDashboard = () => {
-  const { logout, user } = useAuth();
-  const navigate = useNavigate();
-
-  const handleLogout = () => {
-    logout();
-    navigate('/admin/login');
-  };
 
   // State Management for Courses (Persistent in LocalStorage)
   const [courses, setCourses] = useState(() => {
@@ -102,29 +93,6 @@ const AdminDashboard = () => {
   const formatCurrency = (num) => {
     return '₹' + num.toLocaleString('en-IN');
   };
-
-  const menuItems = [
-    { label: 'Dashboard', icon: '📊', active: true },
-    { category: 'MANAGE' },
-    { label: 'Users', icon: '👥' },
-    { label: 'Courses', icon: '📖' },
-    { label: 'Enrollments', icon: '🎓' },
-    { label: 'Certificates', icon: '🎖️' },
-    { label: 'Applications', icon: '📄' },
-    { label: 'Jobs', icon: '💼' },
-    { category: 'FINANCE' },
-    { label: 'Payments', icon: '💳' },
-    { label: 'Transactions', icon: '🔄' },
-    { label: 'Refunds', icon: '↩️' },
-    { label: 'Discounts', icon: '🏷️' },
-    { category: 'COMMUNICATION' },
-    { label: 'Messages', icon: '💬' },
-    { label: 'Notifications', icon: '🔔' },
-    { category: 'SETTINGS' },
-    { label: 'Site Settings', icon: '⚙️' },
-    { label: 'Roles & Permissions', icon: '🛡️' },
-    { label: 'System Logs', icon: '📄' }
-  ];
 
   return (
     <div className="admin-main-panel" style={{ marginLeft: 0, padding: '20px 0', width: '100%' }}>
