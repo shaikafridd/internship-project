@@ -230,24 +230,26 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
         </nav>
 
         {/* Promo card matches template screenshot footer */}
-        {isCourseView ? (
-          <div className="sidebar-promo-card animate-float">
-            <span className="promo-icon">🏆</span>
-            <h4>Keep Going!</h4>
-            <p>You're doing great. Complete the course and earn your certificate.</p>
-            <button className="btn btn-primary" onClick={() => navigate('/profile')}>
-              View My Progress
-            </button>
-          </div>
-        ) : (
-          <div className="sidebar-promo-card animate-float">
-            <span className="promo-icon">👑</span>
-            <h4>Go Premium</h4>
-            <p>Unlock premium courses, exclusive jobs and more benefits.</p>
-            <button className="btn btn-primary" onClick={() => navigate('/payments')}>
-              Upgrade Now
-            </button>
-          </div>
+        {user?.role !== 'admin' && (
+          isCourseView ? (
+            <div className="sidebar-promo-card animate-float">
+              <span className="promo-icon">🏆</span>
+              <h4>Keep Going!</h4>
+              <p>You're doing great. Complete the course and earn your certificate.</p>
+              <button className="btn btn-primary" onClick={() => navigate('/profile')}>
+                View My Progress
+              </button>
+            </div>
+          ) : (
+            <div className="sidebar-promo-card animate-float">
+              <span className="promo-icon">👑</span>
+              <h4>Go Premium</h4>
+              <p>Unlock premium courses, exclusive jobs and more benefits.</p>
+              <button className="btn btn-primary" onClick={() => navigate('/payments')}>
+                Upgrade Now
+              </button>
+            </div>
+          )
         )}
       </aside>
 

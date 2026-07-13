@@ -70,48 +70,6 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  // Admin login handler
-  const adminLogin = async (name, password) => {
-    setError(null);
-    setLoading(true);
-    try {
-      const res = await authAPI.adminLogin(name, password);
-      if (res.success && res.token) {
-        localStorage.setItem('token', res.token);
-        setUser(res.user);
-        return res;
-      } else {
-        throw new Error(res.message || 'Admin login failed');
-      }
-    } catch (err) {
-      setError(err.message);
-      throw err;
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // Admin setup handler (first-time admin account creation)
-  const adminSetup = async (name, password) => {
-    setError(null);
-    setLoading(true);
-    try {
-      const res = await authAPI.adminSetup(name, password);
-      if (res.success && res.token) {
-        localStorage.setItem('token', res.token);
-        setUser(res.user);
-        return res;
-      } else {
-        throw new Error(res.message || 'Admin setup failed');
-      }
-    } catch (err) {
-      setError(err.message);
-      throw err;
-    } finally {
-      setLoading(false);
-    }
-  };
-
   // Logout handler
   const logout = () => {
     localStorage.removeItem('token');
@@ -138,7 +96,6 @@ export const AuthProvider = ({ children }) => {
     error,
     login,
     adminLogin,
-    adminSetup,
     signup,
     logout,
     reloadUser,

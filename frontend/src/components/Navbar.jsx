@@ -36,40 +36,46 @@ const Navbar = ({ toggleSidebar }) => {
         )}
       </div>
 
-      <div className="navbar-center-search">
-        <div className="navbar-search-container">
-          <svg className="search-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-            <circle cx="11" cy="11" r="8"/>
-            <line x1="21" y1="21" x2="16.65" y2="16.65"/>
-          </svg>
-          <input 
-            type="text" 
-            placeholder={isCourseView ? "Search for courses, jobs..." : "Search for courses, jobs, skills..."} 
-            className="navbar-search-input"
-          />
+      {user?.role !== 'admin' && (
+        <div className="navbar-center-search">
+          <div className="navbar-search-container">
+            <svg className="search-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="11" cy="11" r="8"/>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+            </svg>
+            <input 
+              type="text" 
+              placeholder={isCourseView ? "Search for courses, jobs..." : "Search for courses, jobs, skills..."} 
+              className="navbar-search-input"
+            />
+          </div>
         </div>
-      </div>
+      )}
 
       <div className="navbar-right">
-        {/* Mail Icon (visible on profile or generally) */}
-        <div className="nav-icon-btn">
-          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
-            <polyline points="22,6 12,13 2,6" />
-          </svg>
-        </div>
+        {user?.role !== 'admin' && (
+          <>
+            {/* Mail Icon (visible on profile or generally) */}
+            <div className="nav-icon-btn">
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
+                <polyline points="22,6 12,13 2,6" />
+              </svg>
+            </div>
 
-        {/* Notification Bell Icon */}
-        <div className="nav-icon-btn has-badge">
-          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
-            <path d="M13.73 21a2 2 0 0 1-3.46 0" />
-          </svg>
-          <span className="badge-count">3</span>
-        </div>
+            {/* Notification Bell Icon */}
+            <div className="nav-icon-btn has-badge">
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
+                <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+              </svg>
+              <span className="badge-count">3</span>
+            </div>
+          </>
+        )}
 
         {/* User Card */}
-        {user && (
+        {user && user.role !== 'admin' && (
           <div className="navbar-user-card" onClick={() => navigate('/profile')}>
             {user.photoUrl ? (
               <img
@@ -104,6 +110,12 @@ const Navbar = ({ toggleSidebar }) => {
             <svg className="chevron-down" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
               <polyline points="6 9 12 15 18 9" />
             </svg>
+          </div>
+        )}
+
+        {user && user.role === 'admin' && (
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'hsl(var(--text-primary))', fontWeight: 600, fontSize: '0.9rem', marginRight: '16px' }}>
+            <span>👤 Welcome, Admin</span>
           </div>
         )}
       </div>
