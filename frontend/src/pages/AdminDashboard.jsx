@@ -3,6 +3,8 @@ import { adminAPI } from '../services/api';
 
 const AdminDashboard = () => {
   const [stats, setStats] = useState(null);
+  const [courses, setCourses] = useState([]);
+  const [payments, setPayments] = useState([]);
 
   useEffect(() => {
     const fetchAdminStats = async () => {
@@ -15,45 +17,29 @@ const AdminDashboard = () => {
         console.error('Failed to load admin stats from backend:', err);
       }
     };
+
+    const fetchCoursesAndPayments = async () => {
+      try {
+        const courseRes = await adminAPI.getCourses();
+        if (courseRes.success && courseRes.data) {
+          setCourses(courseRes.data);
+        }
+        const paymentRes = await adminAPI.getPayments();
+        if (paymentRes.success && paymentRes.data) {
+          setPayments(paymentRes.data);
+        }
+      } catch (err) {
+        console.error('Failed to load admin data from backend:', err);
+      }
+    };
+
     fetchAdminStats();
+    fetchCoursesAndPayments();
   }, []);
-
-  // State Management for Courses (Persistent in LocalStorage)
-  const [courses, setCourses] = useState(() => {
-    const saved = localStorage.getItem('admin_courses');
-    return saved ? JSON.parse(saved) : [
-      { id: 1, name: 'UI/UX Design Mastercourse', instructor: 'Arshad Khan', students: '2,845', price: '₹4,999', status: 'Published' },
-      { id: 2, name: 'Full Stack Web Development', instructor: 'Priya Sharma', students: '2,450', price: '₹6,999', status: 'Published' },
-      { id: 3, name: 'Python for Data Science', instructor: 'Raj Malhotra', students: '2,120', price: '₹5,999', status: 'Published' },
-      { id: 4, name: 'React Developer Bootcamp', instructor: 'Neha Verma', students: '1,890', price: '₹4,499', status: 'Published' },
-      { id: 5, name: 'Digital Marketing Mastery', instructor: 'Sandeep Das', students: '1,560', price: '₹3,999', status: 'Published' }
-    ];
-  });
-
-  // State Management for Payments (Persistent in LocalStorage)
-  const [payments, setPayments] = useState(() => {
-    const saved = localStorage.getItem('admin_payments');
-    return saved ? JSON.parse(saved) : [
-      { id: 1, student: 'Riya Sharma', course: 'UI/UX Design', amount: '₹4,999', status: 'Paid', date: 'Jul 12, 2025' },
-      { id: 2, student: 'Mohammed Ali', course: 'Full Stack Web Dev', amount: '₹6,999', status: 'Paid', date: 'Jul 12, 2025' },
-      { id: 3, student: 'Anjali Verma', course: 'Python for Data Sci', amount: '₹3,999', status: 'Paid', date: 'Jul 12, 2025' },
-      { id: 4, student: 'Rohan Mehta', course: 'React Bootcamp', amount: '₹4,999', status: 'Pending', date: 'Jul 12, 2025' },
-      { id: 5, student: 'Sneha Patel', course: 'Digital Marketing', amount: '₹2,999', status: 'Paid', date: 'Jul 11, 2025' }
-    ];
-  });
-
-  // Persist States
-  useEffect(() => {
-    localStorage.setItem('admin_courses', JSON.stringify(courses));
-  }, [courses]);
-
-  useEffect(() => {
-    localStorage.setItem('admin_payments', JSON.stringify(payments));
-  }, [payments]);
 
   // Modals / Editing States
   const [editCourseId, setEditCourseId] = useState(null);
-  const [courseForm, setCourseForm] = useState({ name: '', instructor: '', price: '', status: '' });
+  const [courseForm, setCourseForm] = useState({ name: '', instructor: '', price: '', status: 'Published' });
   const [editPaymentId, setEditPaymentId] = useState(null);
   const [paymentForm, setPaymentForm] = useState({ student: '', course: '', amount: '', status: '' });
 
@@ -63,20 +49,56 @@ const AdminDashboard = () => {
     setCourseForm({ name: course.name, instructor: course.instructor, price: course.price, status: course.status });
   };
 
-  const handleSaveCourse = (e) => {
+  const handleAddNewCourse = () => {
+    setEditCourseId('new');
+    setCourseForm({ name: '', instructor: '', price: '', status: 'Published' });
+  };
+
+  const handleSaveCourse = async (e) => {
     e.preventDefault();
-    setCourses(courses.map(c => c.id === editCourseId ? { ...c, ...courseForm } : c));
+    try {
+      if (editCourseId === 'new') {
+        const res = await adminAPI.createCourse(courseForm);
+        if (res.success && res.data) {
+          setCourses([...courses, res.data]);
+        }
+      } else {
+        const res = await adminAPI.updateCourse(editCourseId, courseForm);
+        if (res.success && res.data) {
+          setCourses(courses.map(c => c.id === editCourseId ? res.data : c));
+        }
+      }
+    } catch (err) {
+      console.error('Failed to save course', err);
+    }
     setEditCourseId(null);
   };
 
-  const handleDeleteCourse = (id) => {
+  const handleDeleteCourse = async (id) => {
     if (window.confirm("Are you sure you want to delete this course?")) {
-      setCourses(courses.filter(c => c.id !== id));
+      try {
+        const res = await adminAPI.deleteCourse(id);
+        if (res.success) {
+          setCourses(courses.filter(c => c.id !== id));
+        }
+      } catch (err) {
+        console.error('Failed to delete course', err);
+      }
     }
   };
 
-  const toggleCourseStatus = (id) => {
-    setCourses(courses.map(c => c.id === id ? { ...c, status: c.status === 'Published' ? 'Draft' : 'Published' } : c));
+  const toggleCourseStatus = async (id) => {
+    const course = courses.find(c => c.id === id);
+    if (!course) return;
+    const newStatus = course.status === 'Published' ? 'Draft' : 'Published';
+    try {
+      const res = await adminAPI.updateCourse(id, { status: newStatus });
+      if (res.success && res.data) {
+        setCourses(courses.map(c => c.id === id ? { ...c, status: newStatus } : c));
+      }
+    } catch (err) {
+      console.error('Failed to toggle course status', err);
+    }
   };
 
   // Payment Actions
@@ -85,26 +107,47 @@ const AdminDashboard = () => {
     setPaymentForm({ student: payment.student, course: payment.course, amount: payment.amount, status: payment.status });
   };
 
-  const handleSavePayment = (e) => {
+  const handleSavePayment = async (e) => {
     e.preventDefault();
-    setPayments(payments.map(p => p.id === editPaymentId ? { ...p, ...paymentForm } : p));
+    try {
+      const res = await adminAPI.updatePaymentStatus(editPaymentId);
+      if (res.success) {
+        setPayments(payments.map(p => p.id === editPaymentId ? { ...p, status: p.status === 'Paid' ? 'Pending' : 'Paid' } : p));
+      }
+    } catch (err) {
+      console.error('Failed to update payment status', err);
+    }
     setEditPaymentId(null);
   };
 
-  const handleDeletePayment = (id) => {
+  const handleDeletePayment = async (id) => {
     if (window.confirm("Are you sure you want to delete this payment record?")) {
-      setPayments(payments.filter(p => p.id !== id));
+      try {
+        const res = await adminAPI.deletePayment(id);
+        if (res.success) {
+          setPayments(payments.filter(p => p.id !== id));
+        }
+      } catch (err) {
+        console.error('Failed to delete payment', err);
+      }
     }
   };
 
-  const togglePaymentStatus = (id) => {
-    setPayments(payments.map(p => p.id === id ? { ...p, status: p.status === 'Paid' ? 'Pending' : 'Paid' } : p));
+  const togglePaymentStatus = async (id) => {
+    try {
+      const res = await adminAPI.updatePaymentStatus(id);
+      if (res.success) {
+        setPayments(payments.map(p => p.id === id ? { ...p, status: p.status === 'Paid' ? 'Pending' : 'Paid' } : p));
+      }
+    } catch (err) {
+      console.error('Failed to toggle payment status', err);
+    }
   };
 
   // Static stats derived from state totals
   const totalRevenueNumber = payments
-    .filter(p => p.status === 'Paid')
-    .reduce((sum, p) => sum + parseInt(p.amount.replace(/[^0-9]/g, ''), 10), 0);
+    .filter(p => p.status === 'Paid' || p.status === 'Completed')
+    .reduce((sum, p) => sum + parseInt((p.amount || '').toString().replace(/[^0-9]/g, ''), 10), 0);
 
   const formatCurrency = (num) => {
     return '₹' + num.toLocaleString('en-IN');
@@ -498,13 +541,14 @@ const AdminDashboard = () => {
 
         {/* ROW 5: ALL COURSES TABLE (INTERACTIVE) */}
         <div className="admin-card-panel glass-panel" style={{ gridColumn: '1 / -1' }}>
-          <div className="panel-header-row">
+          <div className="panel-header-row" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <h3>All Courses (Interactive)</h3>
+            <button className="btn btn-primary" onClick={handleAddNewCourse} style={{ padding: '6px 12px', fontSize: '0.75rem' }}>+ Add New Course</button>
           </div>
 
           {editCourseId && (
             <form onSubmit={handleSaveCourse} className="admin-inline-form glass-panel animate-fade-in" style={{ padding: '16px', background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '6px', marginBottom: '16px' }}>
-              <h4 style={{ margin: '0 0 12px' }}>Edit Course Details</h4>
+              <h4 style={{ margin: '0 0 12px' }}>{editCourseId === 'new' ? 'Add New Course' : 'Edit Course Details'}</h4>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '12px' }}>
                 <input type="text" placeholder="Course Name" value={courseForm.name} onChange={e => setCourseForm({ ...courseForm, name: e.target.value })} style={{ padding: '6px', fontSize: '0.8rem' }} required />
                 <input type="text" placeholder="Instructor" value={courseForm.instructor} onChange={e => setCourseForm({ ...courseForm, instructor: e.target.value })} style={{ padding: '6px', fontSize: '0.8rem' }} required />

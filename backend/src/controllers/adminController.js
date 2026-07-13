@@ -1,4 +1,6 @@
 const Admin = require('../models/Admin');
+const Course = require('../models/Course');
+const Order = require('../models/Order');
 const jwt = require('jsonwebtoken');
 
 // ─────────────────────────────────────────────
@@ -111,6 +113,212 @@ exports.adminDashboard = async (req, res) => {
     return res.status(500).json({
       success: false,
       message: 'Failed to load dashboard data',
+    });
+  }
+};
+
+// Course CRUD Operations for Admin
+exports.getCoursesAdmin = async (req, res) => {
+  try {
+    const courses = await Course.find();
+    const formatted = courses.map(c => ({
+      id: c._id,
+      name: c.title,
+      instructor: c.instructor,
+      students: '0',
+      price: `₹${c.price.toLocaleString('en-IN')}`,
+      status: 'Published'
+    }));
+    return res.status(200).json({
+      success: true,
+      data: formatted,
+    });
+  } catch (err) {
+    return res.status(500).json({
+      success: false,
+      message: err.message,
+    });
+  }
+};
+
+exports.createCourse = async (req, res) => {
+  try {
+    const { name, instructor, price } = req.body;
+    const cleanPrice = typeof price === 'string' ? parseInt(price.replace(/[^0-9]/g, ''), 10) : price;
+
+    const course = await Course.create({
+      title: name,
+      instructor: instructor || 'Admin',
+      price: cleanPrice || 0,
+      description: 'Course created by administrator via dashboard.',
+      category: 'Development',
+      image: 'react_beginners.png',
+      duration: '10h 00m',
+      lessonsCount: 10,
+      sections: [
+        {
+          title: 'Section 1: Introduction',
+          lessons: [
+            { id: Math.random().toString().substring(2,8), title: 'Course Welcome Overview', duration: '05:00' }
+          ]
+        }
+      ]
+    });
+
+    return res.status(201).json({
+      success: true,
+      data: {
+        id: course._id,
+        name: course.title,
+        instructor: course.instructor,
+        students: '0',
+        price: `₹${course.price.toLocaleString('en-IN')}`,
+        status: 'Published'
+      },
+    });
+  } catch (err) {
+    return res.status(500).json({
+      success: false,
+      message: err.message,
+    });
+  }
+};
+
+exports.updateCourse = async (req, res) => {
+  try {
+    const { name, instructor, price } = req.body;
+    const course = await Course.findById(req.params.id);
+    if (!course) {
+      return res.status(404).json({
+        success: false,
+        message: 'Course not found',
+      });
+    }
+
+    if (name) course.title = name;
+    if (instructor) course.instructor = instructor;
+    if (price !== undefined) {
+      course.price = typeof price === 'string' ? parseInt(price.replace(/[^0-9]/g, ''), 10) : price;
+    }
+
+    await course.save();
+
+    return res.status(200).json({
+      success: true,
+      data: {
+        id: course._id,
+        name: course.title,
+        instructor: course.instructor,
+        students: '0',
+        price: `₹${course.price.toLocaleString('en-IN')}`,
+        status: 'Published'
+      },
+    });
+  } catch (err) {
+    return res.status(500).json({
+      success: false,
+      message: err.message,
+    });
+  }
+};
+
+exports.deleteCourse = async (req, res) => {
+  try {
+    const course = await Course.findById(req.params.id);
+    if (!course) {
+      return res.status(404).json({
+        success: false,
+        message: 'Course not found',
+      });
+    }
+
+    await course.deleteOne();
+
+    return res.status(200).json({
+      success: true,
+      message: 'Course deleted successfully',
+    });
+  } catch (err) {
+    return res.status(500).json({
+      success: false,
+      message: err.message,
+    });
+  }
+};
+
+// Payment CRUD Operations for Admin
+exports.getPaymentsAdmin = async (req, res) => {
+  try {
+    const orders = await Order.find()
+      .populate('user', 'name')
+      .populate('course', 'title');
+
+    const formatted = orders.map((o) => ({
+      id: o._id,
+      student: o.user?.name || 'Unknown Student',
+      course: o.course?.title || 'Unknown Course',
+      amount: `₹${o.totalAmount.toLocaleString('en-IN')}`,
+      status: o.status === 'Completed' ? 'Paid' : o.status,
+      date: new Date(o.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+    }));
+
+    return res.status(200).json({
+      success: true,
+      data: formatted,
+    });
+  } catch (err) {
+    return res.status(500).json({
+      success: false,
+      message: err.message,
+    });
+  }
+};
+
+exports.updatePaymentStatusAdmin = async (req, res) => {
+  try {
+    const order = await Order.findById(req.params.id);
+    if (!order) {
+      return res.status(404).json({
+        success: false,
+        message: 'Order not found',
+      });
+    }
+
+    order.status = order.status === 'Completed' ? 'Pending' : 'Completed';
+    await order.save();
+
+    return res.status(200).json({
+      success: true,
+      data: order,
+    });
+  } catch (err) {
+    return res.status(500).json({
+      success: false,
+      message: err.message,
+    });
+  }
+};
+
+exports.deletePaymentAdmin = async (req, res) => {
+  try {
+    const order = await Order.findById(req.params.id);
+    if (!order) {
+      return res.status(404).json({
+        success: false,
+        message: 'Order not found',
+      });
+    }
+
+    await order.deleteOne();
+
+    return res.status(200).json({
+      success: true,
+      message: 'Order deleted successfully',
+    });
+  } catch (err) {
+    return res.status(500).json({
+      success: false,
+      message: err.message,
     });
   }
 };

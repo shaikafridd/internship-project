@@ -156,6 +156,15 @@ export const adminAPI = {
   login: (username, password) => adminApi.post('/admin/login', { username, password }),
   // Protected: fetches dashboard stats (uses admin_token via interceptor)
   getDashboard: () => adminApi.get('/admin/dashboard'),
+  // Courses CRUD
+  getCourses: () => adminApi.get('/admin/courses'),
+  createCourse: (courseData) => adminApi.post('/admin/courses', courseData),
+  updateCourse: (id, courseData) => adminApi.put(`/admin/courses/${id}`, courseData),
+  deleteCourse: (id) => adminApi.delete(`/admin/courses/${id}`),
+  // Payments CRUD
+  getPayments: () => adminApi.get('/admin/payments'),
+  updatePaymentStatus: (id) => adminApi.put(`/admin/payments/${id}`),
+  deletePayment: (id) => adminApi.delete(`/admin/payments/${id}`),
 };
 
 export default api;
