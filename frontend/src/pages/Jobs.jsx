@@ -90,6 +90,7 @@ const Jobs = () => {
   useEffect(() => {
     setSelectedJob(null);
     fetchJobs();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeTab]);
 
   const handleSearchSubmit = (e) => {
@@ -174,7 +175,7 @@ const Jobs = () => {
     }
   };
 
-  const checkIsApplied = (slug) => {
+  const checkIsApplied = (_slug) => {
     // If we've applied during this session or fetched
     if (activeTab === 'applied') return true;
     return false;

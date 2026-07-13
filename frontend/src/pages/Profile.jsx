@@ -118,7 +118,7 @@ const Profile = () => {
     );
   }
 
-  const { name, email, achievements, activityLog, stats, skills, atsTopMatch, atsResults, atsFeedback, atsSkills, education, experience } = profile;
+  const { name, email, achievements, activityLog, stats, skills, atsTopMatch, atsFeedback, education, experience } = profile;
 
   return (
     <div className="profile-wrapper animate-fade-in">

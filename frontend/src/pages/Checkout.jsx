@@ -12,7 +12,7 @@ const Checkout = () => {
   const [error, setError] = useState('');
 
   // Form input states
-  const [coupon, setCoupon] = useState('WELCOME10');
+
   const [appliedCoupon, setAppliedCoupon] = useState('');
   const [paymentTab, setPaymentTab] = useState('Recommended');
   const [selectedMethodId, setSelectedMethodId] = useState('upi');
@@ -25,30 +25,9 @@ const Checkout = () => {
     setLoading(true);
     setError('');
     try {
-      // Fallback for general premium payments or invalid ObjectId
+      // Require valid courseId - all orders must be backed by database courses
       if (!courseId || courseId.length !== 24) {
-        const base = 1499;
-        const discount = discountCode.toUpperCase() === 'WELCOME10' ? 150 : 0;
-        const subtotal = base - discount;
-        const gst = Math.round(subtotal * 0.18 * 100) / 100;
-        const total = Math.round((subtotal + gst) * 100) / 100;
-
-        setInvoice({
-          orderId: 'mock_premium_upgrade_order',
-          courseTitle: 'Premium Membership Upgrade',
-          basePrice: base,
-          discountCode: discountCode || '',
-          discountAmount: discount,
-          gstAmount: gst,
-          totalAmount: total,
-          paymentMethod: 'Card',
-          status: 'Pending'
-        });
-        if (discountCode) {
-          setAppliedCoupon(discountCode);
-        }
-        setLoading(false);
-        return;
+        throw new Error('Invalid course. Please select a course to checkout.');
       }
 
       const res = await paymentAPI.checkout(courseId, discountCode, 'Card');
@@ -71,19 +50,8 @@ const Checkout = () => {
   useEffect(() => {
     // Auto-apply WELCOME10 by default to match screenshot invoice
     fetchCheckoutData('WELCOME10');
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [courseId]);
-
-  const handleApplyCoupon = (e) => {
-    e.preventDefault();
-    if (!coupon.trim()) return;
-    fetchCheckoutData(coupon.trim());
-  };
-
-  const handleRemoveCoupon = () => {
-    setCoupon('');
-    setAppliedCoupon('');
-    fetchCheckoutData('');
-  };
 
   const handleProcessPayment = async () => {
     if (!invoice?.orderId) return;
@@ -94,12 +62,7 @@ const Checkout = () => {
     // Simulate verification delay
     setTimeout(async () => {
       try {
-        // Intercept mock order IDs client-side to bypass backend validator
-        if (invoice.orderId === 'mock_premium_upgrade_order') {
-          setIsVerified(true);
-          return;
-        }
-
+        // All orders are now backed by database - verify with backend
         const res = await paymentAPI.verifyPayment(invoice.orderId, 'Completed');
         if (res.success) {
           setIsVerified(true);
