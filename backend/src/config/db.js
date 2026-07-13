@@ -1,6 +1,23 @@
 const mongoose = require('mongoose');
 const { MongoMemoryServer } = require('mongodb-memory-server');
 
+const DEFAULT_LOCAL_URI = 'mongodb://127.0.0.1:27017/auth-backend';
+
+const getMongoConnectionCandidates = () => {
+  const primaryUri = process.env.MONGODB_URI?.trim();
+  const fallbackUri = process.env.MONGODB_URI_FALLBACK?.trim() || process.env.LOCAL_MONGODB_URI?.trim();
+
+  if (primaryUri) {
+    return [primaryUri];
+  }
+
+  if (fallbackUri) {
+    return [fallbackUri];
+  }
+
+  return [DEFAULT_LOCAL_URI];
+};
+
 // Helper to seed in-memory DB with mockup data
 const seedInMemoryDB = async () => {
   try {
@@ -126,7 +143,7 @@ const seedInMemoryDB = async () => {
     const user = await User.create({
       name: 'Arshad Khan',
       email: 'arshadkhan@gmail.com',
-      password: 'password123', // Will be hashed by user pre-save hook
+      password: 'password123',
       phone: '+91 98765 43210',
       location: 'Hyderabad, India',
       gender: 'Male',
@@ -199,35 +216,53 @@ const seedInMemoryDB = async () => {
 };
 
 const connectDB = async () => {
-  let uri = process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/auth-backend';
-  
-  try {
-    // Attempt standard connection first (timeout 2s)
-    const conn = await mongoose.connect(uri, { serverSelectionTimeoutMS: 2000 });
-    console.log(`MongoDB Connected: ${conn.connection.host}`);
-  } catch (error) {
-    console.log(`Failed to connect to local database at ${uri}.`);
-    console.log('Spinning up MongoMemoryServer for standalone execution...');
-    
+  if (mongoose.connection.readyState === 1) {
+    return mongoose.connection;
+  }
+
+  const uris = getMongoConnectionCandidates();
+  const errors = [];
+  const hasPrimaryUri = Boolean(process.env.MONGODB_URI?.trim());
+
+  for (const uri of uris) {
     try {
-      const mongoServer = await MongoMemoryServer.create({
-        instance: {
-          startupTimeout: 90000 // 90 seconds to prevent slow connection timeouts
-        }
-      });
-      const memoryUri = mongoServer.getUri();
-      
-      const conn = await mongoose.connect(memoryUri);
-      console.log(`In-memory MongoDB Connected: ${conn.connection.host}`);
-      console.log(`URI: ${memoryUri}`);
-      
-      // Seed data automatically
-      await seedInMemoryDB();
-    } catch (memError) {
-      console.error(`Database Connection Error: ${memError.message}`);
-      process.exit(1);
+      const conn = await mongoose.connect(uri, { serverSelectionTimeoutMS: 5000 });
+      console.log(`MongoDB Connected: ${conn.connection.host}`);
+      return conn;
+    } catch (error) {
+      errors.push(`${uri}: ${error.message}`);
+      console.warn(`Failed to connect to database at ${uri}.`);
     }
+  }
+
+  if (hasPrimaryUri) {
+    console.error('Atlas connection failed. Please verify your MONGODB_URI, username, password, network access, and cluster IP allowlist.');
+    process.exit(1);
+  }
+
+  console.log('No MongoDB instance available. Spinning up MongoMemoryServer for standalone execution...');
+
+  try {
+    const mongoServer = await MongoMemoryServer.create({
+      instance: {
+        startupTimeout: 90000,
+      },
+    });
+    const memoryUri = mongoServer.getUri();
+
+    const conn = await mongoose.connect(memoryUri);
+    console.log(`In-memory MongoDB Connected: ${conn.connection.host}`);
+    console.log(`URI: ${memoryUri}`);
+
+    await seedInMemoryDB();
+    return conn;
+  } catch (memError) {
+    console.error(`Database Connection Error: ${memError.message}`);
+    console.error(`Attempted connections: ${errors.join(' | ')}`);
+    process.exit(1);
   }
 };
 
 module.exports = connectDB;
+module.exports.getMongoConnectionCandidates = getMongoConnectionCandidates;
+module.exports.DEFAULT_LOCAL_URI = DEFAULT_LOCAL_URI;
