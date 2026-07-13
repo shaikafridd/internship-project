@@ -259,6 +259,7 @@ exports.analyzeResume = async (req, res, next) => {
     // 3. Save extracted details to Mongoose User document
     const user = await User.findById(req.user.id);
     if (user) {
+      user.resumeUploaded = true;
       if (extractedData.phone) {
         user.phone = extractedData.phone;
       }

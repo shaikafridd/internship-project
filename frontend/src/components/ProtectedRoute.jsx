@@ -19,7 +19,7 @@ const ProtectedRoute = ({ children }) => {
   }
 
   // Gating: If user is logged in but hasn't scanned a resume yet, restrict them to /ats-analyzer.
-  const hasResume = user?.atsTopMatch?.role;
+  const hasResume = user?.resumeUploaded || user?.atsTopMatch?.role || (user?.atsSkills && user.atsSkills.length > 0);
   if (!hasResume && location.pathname !== '/ats-analyzer') {
     return <Navigate to="/ats-analyzer" replace />;
   }

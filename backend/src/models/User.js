@@ -73,6 +73,10 @@ const UserSchema = new mongoose.Schema({
     type: String,
     default: '',
   },
+  resumeUploaded: {
+    type: Boolean,
+    default: false,
+  },
   achievements: [
     {
       title: { type: String, required: true },
