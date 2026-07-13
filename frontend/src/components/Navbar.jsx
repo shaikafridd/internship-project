@@ -30,6 +30,8 @@ const Navbar = ({ toggleSidebar }) => {
           </div>
         ) : isProfileView ? (
           <h2 className="navbar-page-title">My Profile</h2>
+        ) : location.pathname.startsWith('/admin') ? (
+          <h2 className="navbar-page-title">Admin Dashboard</h2>
         ) : (
           null
         )}

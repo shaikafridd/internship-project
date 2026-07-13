@@ -127,100 +127,10 @@ const AdminDashboard = () => {
   ];
 
   return (
-    <div className="admin-container animate-fade-in">
+    <div className="admin-main-panel" style={{ marginLeft: 0, padding: '20px 0', width: '100%' }}>
       
-      {/* 1. Admin Left Sidebar */}
-      <aside className="admin-sidebar">
-        <div className="admin-brand">
-          <div className="logo-icon-blue">
-            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-              <path d="M22 10v6M2 10l10-5 10 5-10 5z" />
-              <path d="M6 12v5c0 2 2 3 6 3s6-1 6-3v-5" />
-            </svg>
-          </div>
-          <div className="brand-text">
-            <h3>CareerHub</h3>
-            <span>Admin Panel</span>
-          </div>
-        </div>
-
-        <nav className="admin-nav-links">
-          {menuItems.map((item, idx) => {
-            if (item.category) {
-              return <span key={idx} className="nav-section-title">{item.category}</span>;
-            }
-            return (
-              <button 
-                key={idx} 
-                className={`admin-nav-link ${item.active ? 'active' : ''}`}
-                type="button"
-              >
-                <span className="nav-icon">{item.icon}</span>
-                <span className="nav-label">{item.label}</span>
-              </button>
-            );
-          })}
-
-          <div style={{ padding: '0 10px', marginTop: '20px' }}>
-            <button className="admin-nav-link logout-btn" onClick={handleLogout} type="button">
-              <span className="nav-icon">🚪</span>
-              <span className="nav-label">Logout</span>
-            </button>
-          </div>
-        </nav>
-
-        {/* Profile Card Footer */}
-        <div className="admin-profile-footer">
-          <img src="https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?w=100" alt="Admin" className="admin-avatar" />
-          <div className="admin-info">
-            <h4>{user?.name || 'Admin'}</h4>
-            <span>Super Administrator</span>
-          </div>
-          <span className="down-chevron">▾</span>
-        </div>
-      </aside>
-
-      {/* 2. Admin Main Panel */}
-      <main className="admin-main-panel">
-        
-        {/* Top Header Row */}
-        <header className="admin-header">
-          <div className="admin-header-left">
-            <h2>Welcome back, Admin! 👋</h2>
-            <p>Here's what's happening on your platform today.</p>
-          </div>
-
-          <div className="admin-header-right">
-            {/* Date Picker Widget */}
-            <div className="date-picker-widget">
-              <span>📅 Jul 06, 2025 - Jul 12, 2025</span>
-            </div>
-
-            {/* Search container */}
-            <div className="admin-search-container">
-              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="search-icon">
-                <circle cx="11" cy="11" r="8"/>
-                <line x1="21" y1="21" x2="16.65" y2="16.65"/>
-              </svg>
-              <input type="text" placeholder="Search anything..." />
-            </div>
-
-            {/* Notification Bell */}
-            <div className="admin-notify-btn">
-              🔔
-              <span className="badge">5</span>
-            </div>
-
-            {/* Admin Avatar */}
-            <div className="admin-avatar-card">
-              <img src="https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?w=80" alt="Admin" />
-              <span>Admin ▾</span>
-            </div>
-          </div>
-        </header>
-
-        {/* Grid Container Content */}
-        <div className="admin-content-grid">
+      {/* Grid Container Content */}
+      <div className="admin-content-grid">
           
           {/* ROW 1: 5 STAT CARDS */}
           <div className="admin-stats-row">
@@ -670,8 +580,6 @@ const AdminDashboard = () => {
 
         </div>
 
-      </main>
-
       {/* Styled JSX Rules */}
       <style>{`
         .admin-container {
@@ -825,8 +733,6 @@ const AdminDashboard = () => {
         /* Main Content pane */
         .admin-main-panel {
           flex: 1;
-          margin-left: 260px;
-          padding: 30px;
           display: flex;
           flex-direction: column;
           gap: 24px;

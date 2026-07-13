@@ -37,8 +37,7 @@ const AppContent = () => {
 
   // Paths that do not show sidebar and navbar (Landing and Auth pages)
   const noLayoutPaths = ['/', '/login', '/signup', '/admin/login'];
-  const isAdminPath = location.pathname.startsWith('/admin');
-  const showLayout = isAuthenticated && !noLayoutPaths.includes(location.pathname) && !isAdminPath;
+  const showLayout = isAuthenticated && !noLayoutPaths.includes(location.pathname);
 
   return (
     <div className="app-container">
