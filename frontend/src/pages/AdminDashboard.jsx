@@ -1,10 +1,30 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { adminAPI } from '../services/api';
 
 const AdminDashboard = () => {
   const { logout, user } = useAuth();
   const navigate = useNavigate();
+  const [dashboardData, setDashboardData] = useState(null);
+
+  // Fetch protected dashboard data on mount; redirect if token invalid
+  useEffect(() => {
+    const fetchDashboard = async () => {
+      try {
+        const res = await adminAPI.getDashboard();
+        if (res.success) {
+          setDashboardData(res.data);
+        }
+      } catch (err) {
+        console.error('Admin dashboard fetch failed:', err.message);
+        // Token is invalid or expired — clear and redirect to login
+        localStorage.removeItem('admin_token');
+        navigate('/admin/login', { replace: true });
+      }
+    };
+    fetchDashboard();
+  }, [navigate]);
 
   const handleLogout = () => {
     logout();

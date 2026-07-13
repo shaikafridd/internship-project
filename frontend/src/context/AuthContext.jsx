@@ -1,5 +1,5 @@
 import React, { createContext, useState, useEffect, useContext } from 'react';
-import { authAPI } from '../services/api';
+import { authAPI, adminAPI } from '../services/api';
 
 const AuthContext = createContext(null);
 
@@ -11,13 +11,33 @@ export const AuthProvider = ({ children }) => {
   // Load user data on startup if token exists
   useEffect(() => {
     const loadUser = async () => {
-      const token = localStorage.getItem('token');
-      if (!token) {
-        setLoading(false);
+      // Check for admin session first
+      const adminToken = localStorage.getItem('admin_token');
+      if (adminToken) {
+        try {
+          const res = await adminAPI.getDashboard();
+          if (res.success && res.data) {
+            setUser({
+              id: res.data.adminId,
+              name: 'Admin',
+              username: res.data.username,
+              role: 'admin',
+            });
+          } else {
+            localStorage.removeItem('admin_token');
+          }
+        } catch (err) {
+          console.error('Admin token invalid, clearing session', err.message);
+          localStorage.removeItem('admin_token');
+        } finally {
+          setLoading(false);
+        }
         return;
       }
-      if (token === 'mock-admin-token') {
-        setUser({ id: 'admin-id', name: 'Admin', email: 'admin@careerhub.com', role: 'admin' });
+
+      // Check for regular user session
+      const token = localStorage.getItem('token');
+      if (!token) {
         setLoading(false);
         return;
       }
@@ -38,20 +58,11 @@ export const AuthProvider = ({ children }) => {
     loadUser();
   }, []);
 
-  // Login handler
+  // Regular user login handler
   const login = async (email, password) => {
     setError(null);
     setLoading(true);
     try {
-      // Mock Admin Credentials Override
-      if (email === 'admin@careerhub.com' && password === 'adminpassword') {
-        localStorage.setItem('token', 'mock-admin-token');
-        const mockAdmin = { id: 'admin-id', name: 'Admin', email: 'admin@careerhub.com', role: 'admin' };
-        setUser(mockAdmin);
-        setLoading(false);
-        return { success: true, user: mockAdmin, token: 'mock-admin-token' };
-      }
-
       const res = await authAPI.login(email, password);
       if (res.success && res.token) {
         localStorage.setItem('token', res.token);
@@ -59,6 +70,28 @@ export const AuthProvider = ({ children }) => {
         return res;
       } else {
         throw new Error(res.message || 'Login failed');
+      }
+    } catch (err) {
+      setError(err.message);
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Admin login handler — calls dedicated /api/admin/login endpoint
+  const adminLogin = async (username, password) => {
+    setError(null);
+    setLoading(true);
+    try {
+      const res = await adminAPI.login(username, password);
+      if (res.success && res.token) {
+        // Store admin JWT under a separate key to avoid collision with user token
+        localStorage.setItem('admin_token', res.token);
+        setUser({ ...res.user, name: 'Admin' });
+        return res;
+      } else {
+        throw new Error(res.message || 'Admin login failed');
       }
     } catch (err) {
       setError(err.message);
@@ -89,9 +122,10 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  // Logout handler
+  // Logout handler — clears both user and admin tokens
   const logout = () => {
     localStorage.removeItem('token');
+    localStorage.removeItem('admin_token');
     setUser(null);
   };
 
@@ -114,6 +148,7 @@ export const AuthProvider = ({ children }) => {
     loading,
     error,
     login,
+    adminLogin,
     signup,
     logout,
     reloadUser,

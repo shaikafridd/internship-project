@@ -3,19 +3,19 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
 const AdminLogin = () => {
-  const { login } = useAuth();
+  const { adminLogin } = useAuth();
   const navigate = useNavigate();
 
   // Form states
-  const [email, setEmail] = useState('admin@careerhub.com');
-  const [password, setPassword] = useState('adminpassword');
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formError, setFormError] = useState('');
   const [successMsg, setSuccessMsg] = useState('');
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!email || !password) {
+    if (!username || !password) {
       setFormError('Please fill in all fields');
       return;
     }
@@ -24,8 +24,8 @@ const AdminLogin = () => {
     setIsSubmitting(true);
 
     try {
-      const res = await login(email, password);
-      if (res.user && res.user.role === 'admin') {
+      const res = await adminLogin(username.trim(), password);
+      if (res && res.user && res.user.role === 'admin') {
         setSuccessMsg('Admin authentication successful! Access granted...');
         setTimeout(() => {
           navigate('/admin/dashboard');
@@ -107,19 +107,21 @@ const AdminLogin = () => {
 
           <form onSubmit={handleSubmit}>
             <div className="form-group" style={{ marginBottom: '20px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
-              <label className="form-label" style={{ color: '#cbd5e1', fontSize: '0.85rem', fontWeight: 600 }}>Admin Email Address</label>
+              <label className="form-label" style={{ color: '#cbd5e1', fontSize: '0.85rem', fontWeight: 600 }}>Admin Username</label>
               <div className="input-container-icon" style={{ position: 'relative' }}>
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', color: '#64748b' }}>
-                  <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
-                  <polyline points="22,6 12,13 2,6" />
+                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                  <circle cx="12" cy="7" r="4" />
                 </svg>
                 <input
-                  type="email"
+                  id="admin-username"
+                  type="text"
                   className="form-control"
-                  placeholder="admin@careerhub.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="admin"
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
                   required
+                  autoComplete="username"
                   disabled={isSubmitting}
                   style={{ width: '100%', background: 'rgba(255,255,255,0.04)', color: 'white', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '6px', padding: '12px 12px 12px 42px', fontSize: '0.9rem', outline: 'none' }}
                 />

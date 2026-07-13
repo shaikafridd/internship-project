@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-// Create Axios Instance
+// ─── Regular User API Instance ────────────────────────────────────────────────
 const api = axios.create({
   baseURL: '/api',
   headers: {
@@ -8,7 +8,15 @@ const api = axios.create({
   },
 });
 
-// Request Interceptor: Attach Auth JWT Token
+// ─── Admin API Instance (uses admin_token) ────────────────────────────────────
+const adminApi = axios.create({
+  baseURL: '/api',
+  headers: {
+    'Content-Type': 'application/json',
+  },
+});
+
+// Request Interceptor: Attach regular user JWT Token
 api.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('token');
@@ -22,7 +30,21 @@ api.interceptors.request.use(
   }
 );
 
-// Response Interceptor: Handle errors globally
+// Request Interceptor: Attach admin JWT Token
+adminApi.interceptors.request.use(
+  (config) => {
+    const token = localStorage.getItem('admin_token');
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  },
+  (error) => {
+    return Promise.reject(error);
+  }
+);
+
+// Response Interceptor for regular user API: handle 401
 api.interceptors.response.use(
   (response) => response.data,
   (error) => {
@@ -31,6 +53,19 @@ api.interceptors.response.use(
     if (error.response?.status === 401 && localStorage.getItem('token')) {
       localStorage.removeItem('token');
       window.location.href = '/login';
+    }
+    return Promise.reject(new Error(message));
+  }
+);
+
+// Response Interceptor for admin API: handle 401
+adminApi.interceptors.response.use(
+  (response) => response.data,
+  (error) => {
+    const message = error.response?.data?.message || 'Something went wrong. Please try again.';
+    if (error.response?.status === 401 && localStorage.getItem('admin_token')) {
+      localStorage.removeItem('admin_token');
+      window.location.href = '/admin/login';
     }
     return Promise.reject(new Error(message));
   }
@@ -111,6 +146,14 @@ export const atsAPI = {
 export const profileAPI = {
   getProfile: () => api.get('/profile'),
   updateProfile: (profileData) => api.put('/profile', profileData),
+};
+
+// Admin Endpoints
+export const adminAPI = {
+  // Public: authenticate with username + password, returns { success, token, user }
+  login: (username, password) => adminApi.post('/admin/login', { username, password }),
+  // Protected: fetches dashboard stats (uses admin_token via interceptor)
+  getDashboard: () => adminApi.get('/admin/dashboard'),
 };
 
 export default api;

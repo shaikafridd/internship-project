@@ -9,12 +9,16 @@ const dashboardRoutes = require('./src/routes/dashboardRoutes');
 const jobRoutes = require('./src/routes/jobRoutes');
 const atsRoutes = require('./src/routes/atsRoutes');
 const profileRoutes = require('./src/routes/profileRoutes');
+const adminRoutes = require('./src/routes/adminRoutes');
+const { seedAdmin } = require('./src/controllers/adminController');
 
 // Load environment variables
 dotenv.config();
 
-// Connect to database
-connectDB();
+// Connect to database and seed default admin on startup
+connectDB().then(() => {
+  seedAdmin();
+});
 
 const app = express();
 
@@ -36,6 +40,7 @@ app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/jobs', jobRoutes);
 app.use('/api/ats', atsRoutes);
 app.use('/api/profile', profileRoutes);
+app.use('/api/admin', adminRoutes);
 
 // Root route
 app.get('/', (req, res) => {
