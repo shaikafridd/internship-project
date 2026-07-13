@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { myCoursesAPI } from '../services/api';
+import { myCoursesAPI, coursesAPI } from '../services/api';
 
 const MyCourses = () => {
   const { courseId } = useParams();
@@ -15,6 +15,11 @@ const MyCourses = () => {
   const [completingIds, setCompletingIds] = useState({});
   const [activeTab, setActiveTab] = useState('Overview');
   const [expandedSections, setExpandedSections] = useState({ 0: true });
+
+  // Enrollment checks & fallbacks
+  const [isNotEnrolledButExists, setIsNotEnrolledButExists] = useState(false);
+  const [isCourseNotFound, setIsCourseNotFound] = useState(false);
+  const [courseDetails, setCourseDetails] = useState(null);
 
   // Custom Video Player States
   const videoRef = React.useRef(null);
@@ -83,6 +88,9 @@ const MyCourses = () => {
 
   const fetchEnrollment = async (isSilent = false) => {
     if (!isSilent) setLoading(true);
+    setError('');
+    setIsNotEnrolledButExists(false);
+    setIsCourseNotFound(false);
     try {
       const res = await myCoursesAPI.getMyCourseById(courseId);
       if (res.success && res.data) {
@@ -99,6 +107,18 @@ const MyCourses = () => {
       }
     } catch (err) {
       console.error('Error fetching enrolled course', err);
+      // Differentiate between non-enrolled vs non-existent course
+      try {
+        const courseRes = await coursesAPI.getCourseById(courseId);
+        if (courseRes.success && courseRes.data) {
+          setIsNotEnrolledButExists(true);
+          setCourseDetails(courseRes.data);
+        } else {
+          setIsCourseNotFound(true);
+        }
+      } catch {
+        setIsCourseNotFound(true);
+      }
       setError(err.message || 'Unable to load course player');
     } finally {
       if (!isSilent) setLoading(false);
@@ -109,6 +129,15 @@ const MyCourses = () => {
     fetchEnrollment();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [courseId]);
+
+  useEffect(() => {
+    if (isCourseNotFound) {
+      const timer = setTimeout(() => {
+        navigate('/courses');
+      }, 2000);
+      return () => clearTimeout(timer);
+    }
+  }, [isCourseNotFound, navigate]);
 
   const toggleSection = (index) => {
     setExpandedSections(prev => ({
@@ -142,6 +171,44 @@ const MyCourses = () => {
     return (
       <div className="spinner-container">
         <div className="spinner"></div>
+      </div>
+    );
+  }
+
+  if (isCourseNotFound) {
+    return (
+      <div className="error-container glass-panel animate-fade-in" style={{ textAlign: 'center', padding: '40px', maxWidth: '600px', margin: '40px auto' }}>
+        <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ color: 'hsl(var(--accent-red))', marginBottom: '16px' }}>
+          <circle cx="12" cy="12" r="10" />
+          <line x1="12" y1="8" x2="12" y2="12" />
+          <line x1="12" y1="16" x2="12.01" y2="16" />
+        </svg>
+        <h3>Course Not Available</h3>
+        <p>The requested course is not available in our database. Redirecting to available courses...</p>
+        <button className="btn btn-primary" onClick={() => navigate('/courses')} style={{ marginTop: '16px' }}>
+          Go to Courses Catalog
+        </button>
+      </div>
+    );
+  }
+
+  if (isNotEnrolledButExists) {
+    return (
+      <div className="error-container glass-panel animate-fade-in" style={{ textAlign: 'center', padding: '40px', maxWidth: '600px', margin: '40px auto' }}>
+        <div style={{ fontSize: '3.5rem', marginBottom: '16px' }}>🔒</div>
+        <h3>Premium Course Locked</h3>
+        <h4 style={{ color: 'hsl(var(--text-primary))', margin: '8px 0 16px', fontSize: '1.25rem' }}>{courseDetails?.title}</h4>
+        <p style={{ color: 'hsl(var(--text-secondary))', lineHeight: 1.5, marginBottom: '24px' }}>
+          You have not purchased this course yet. Enroll today to unlock the full course player, lessons, downloadable resources, and get your completion certificate!
+        </p>
+        <div style={{ display: 'flex', gap: '12px', justifyContent: 'center' }}>
+          <button className="btn btn-primary glow-btn" onClick={() => navigate(`/checkout/${courseId}`)}>
+            Buy & Enroll Now (₹{courseDetails?.price})
+          </button>
+          <button className="btn btn-secondary" onClick={() => navigate('/courses')}>
+            Browse Other Courses
+          </button>
+        </div>
       </div>
     );
   }
