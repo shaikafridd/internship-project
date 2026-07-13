@@ -16,6 +16,9 @@ const sendTokenResponse = (user, statusCode, res) => {
       id: user._id,
       name: user.name,
       email: user.email,
+      resumeUploaded: user.resumeUploaded || false,
+      atsTopMatch: user.atsTopMatch,
+      atsSkills: user.atsSkills || [],
     },
   });
 };
