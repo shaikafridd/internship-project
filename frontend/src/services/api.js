@@ -102,7 +102,7 @@ export const atsAPI = {
         },
       }
     );
-    return res.data;
+    return res.data.data;
   },
   saveAtsResults: (atsData) => api.post('/ats/save', atsData),
 };
