@@ -1,5 +1,5 @@
 import React, { createContext, useState, useEffect, useContext } from 'react';
-import { authAPI } from '../services/api';
+import { authAPI, adminAPI } from '../services/api';
 
 const AuthContext = createContext(null);
 
@@ -75,7 +75,7 @@ export const AuthProvider = ({ children }) => {
     setError(null);
     setLoading(true);
     try {
-      const res = await authAPI.adminLogin(username, password);
+      const res = await adminAPI.login(username, password);
       if (res.success && res.token) {
         localStorage.setItem('admin_token', res.token);
         setUser(res.user);
