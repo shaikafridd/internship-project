@@ -91,6 +91,7 @@ exports.adminLogin = async (req, res) => {
 // ─────────────────────────────────────────────
 exports.adminDashboard = async (req, res) => {
   try {
+    const mongoose = require('mongoose');
     // req.admin is set by verifyAdminToken middleware
     return res.status(200).json({
       success: true,
@@ -105,6 +106,13 @@ exports.adminDashboard = async (req, res) => {
           totalEnrollments: 25671,
           totalRevenue: 1886995,
           pendingPayouts: 245300,
+        },
+        serverInfo: {
+          nodeEnv: process.env.NODE_ENV || 'development',
+          port: process.env.PORT || 5000,
+          dbStatus: mongoose.connection.readyState === 1 ? 'Connected (Atlas DB)' : 'Disconnected',
+          platform: process.platform,
+          memoryUsage: `${(process.memoryUsage().heapUsed / 1024 / 1024).toFixed(1)} MB`
         },
         serverStatus: 'operational',
         timestamp: new Date().toISOString(),
