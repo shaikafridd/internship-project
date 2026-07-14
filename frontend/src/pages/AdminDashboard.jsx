@@ -34,13 +34,21 @@ const AdminDashboard = () => {
   const [uploadingLessonKey, setUploadingLessonKey] = useState(null);
   const [lessonUploadProgress, setLessonUploadProgress] = useState(0);
 
+  // Server Info States
+  const [serverInfo, setServerInfo] = useState(null);
+  const [responseTime, setResponseTime] = useState(null);
+
   // Fetch admin stats, courses, payments and users
   useEffect(() => {
     const fetchAdminStats = async () => {
       try {
+        const start = performance.now();
         const res = await adminAPI.getDashboard();
+        const end = performance.now();
+        setResponseTime(Math.round(end - start));
         if (res.success && res.data) {
           setStats(res.data.stats);
+          setServerInfo(res.data.serverInfo);
         }
       } catch (err) {
         console.error('Failed to load admin stats from backend:', err);
@@ -1112,24 +1120,44 @@ const AdminDashboard = () => {
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid #f1f5f9', paddingBottom: '8px' }}>
                     <span style={{ fontSize: '0.85rem', color: '#64748b' }}>Mongoose Database Status:</span>
-                    <strong style={{ fontSize: '0.85rem', color: '#10b981' }}>Connected (Atlas DB)</strong>
+                    <strong style={{ fontSize: '0.85rem', color: serverInfo?.dbStatus ? '#10b981' : '#f59e0b' }}>
+                      {serverInfo?.dbStatus || 'Connecting...'}
+                    </strong>
                   </div>
                   <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid #f1f5f9', paddingBottom: '8px' }}>
                     <span style={{ fontSize: '0.85rem', color: '#64748b' }}>Response Time:</span>
-                    <strong style={{ fontSize: '0.85rem', color: '#0f172a' }}>~24ms</strong>
+                    <strong style={{ fontSize: '0.85rem', color: '#0f172a' }}>
+                      {responseTime !== null ? `~${responseTime}ms` : 'Calculating...'}
+                    </strong>
                   </div>
                   <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid #f1f5f9', paddingBottom: '8px' }}>
                     <span style={{ fontSize: '0.85rem', color: '#64748b' }}>Node Environment:</span>
-                    <strong style={{ fontSize: '0.85rem', color: '#2563eb', textTransform: 'uppercase' }}>development</strong>
+                    <strong style={{ fontSize: '0.85rem', color: serverInfo?.nodeEnv === 'production' ? '#10b981' : '#2563eb', textTransform: 'uppercase' }}>
+                      {serverInfo?.nodeEnv || 'development'}
+                    </strong>
                   </div>
                   <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid #f1f5f9', paddingBottom: '8px' }}>
                     <span style={{ fontSize: '0.85rem', color: '#64748b' }}>API Port:</span>
-                    <strong style={{ fontSize: '0.85rem', color: '#0f172a' }}>5000</strong>
+                    <strong style={{ fontSize: '0.85rem', color: '#0f172a' }}>
+                      {serverInfo?.port || '5000'}
+                    </strong>
                   </div>
                   <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid #f1f5f9', paddingBottom: '8px' }}>
-                    <span style={{ fontSize: '0.85rem', color: '#64748b' }}>Client Development Port:</span>
-                    <strong style={{ fontSize: '0.85rem', color: '#0f172a' }}>5173 (Vite)</strong>
+                    <span style={{ fontSize: '0.85rem', color: '#64748b' }}>Client Deployment:</span>
+                    <strong style={{ fontSize: '0.85rem', color: '#0f172a' }}>
+                      {window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' 
+                        ? `${window.location.port || '5173'} (Vite Local)` 
+                        : 'Netlify (Production)'}
+                    </strong>
                   </div>
+                  {serverInfo?.memoryUsage && (
+                    <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid #f1f5f9', paddingBottom: '8px' }}>
+                      <span style={{ fontSize: '0.85rem', color: '#64748b' }}>Heap Memory Usage:</span>
+                      <strong style={{ fontSize: '0.85rem', color: '#0f172a' }}>
+                        {serverInfo.memoryUsage}
+                      </strong>
+                    </div>
+                  )}
                 </div>
 
                 <div style={{ marginTop: '24px' }}>
