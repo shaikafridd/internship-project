@@ -740,6 +740,30 @@ const Checkout = () => {
         }
 
         @media (max-width: 768px) {
+          .checkout-method-card {
+            grid-template-columns: 1fr;
+          }
+          .checkout-tabs-list {
+            flex-direction: row;
+            overflow-x: auto;
+            border-right: none;
+            border-bottom: 1px solid hsl(var(--border-color));
+            white-space: nowrap;
+            -webkit-overflow-scrolling: touch;
+          }
+          .checkout-tab-item {
+            width: auto;
+            padding: 12px 16px;
+            border-left: none;
+            border-bottom: 3.5px solid transparent;
+            text-align: center;
+          }
+          .checkout-tab-item.active {
+            border-bottom-color: hsl(var(--primary));
+          }
+          .checkout-tab-details {
+            padding: 20px;
+          }
           .checkout-bottom-cta-bar {
             flex-direction: column;
             gap: 16px;

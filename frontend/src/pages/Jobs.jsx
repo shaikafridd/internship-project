@@ -13,6 +13,7 @@ const Jobs = () => {
   const [savedJobs, setSavedJobs] = useState([]);
   const [appliedJobs, setAppliedJobs] = useState([]);
   const [selectedJob, setSelectedJob] = useState(null);
+  const [mobileView, setMobileView] = useState('list'); // Added for mobile responsiveness
 
   // Loaders
   const [loading, setLoading] = useState(true);
@@ -40,6 +41,11 @@ const Jobs = () => {
   const [wizardSubmitting, setWizardSubmitting] = useState(false);
   const [wizardError, setWizardError] = useState('');
   const [wizardSuccess, setWizardSuccess] = useState(false);
+
+  const handleSelectJob = (job) => {
+    setSelectedJob(job);
+    setMobileView('details');
+  };
 
   useEffect(() => {
     if (user) {
@@ -97,6 +103,7 @@ const Jobs = () => {
 
   useEffect(() => {
     setSelectedJob(null);
+    setMobileView('list');
     fetchJobs();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeTab, urlSearch]);
@@ -277,7 +284,7 @@ const Jobs = () => {
                   <div 
                     key={job.slug} 
                     className={`job-item-card glass-panel ${selectedJob?.slug === job.slug ? 'active' : ''}`}
-                    onClick={() => setSelectedJob(job)}
+                    onClick={() => handleSelectJob(job)}
                   >
                     <div className="card-header-row">
                       <h4>{job.title}</h4>
@@ -317,7 +324,7 @@ const Jobs = () => {
                   <div 
                     key={job.slug} 
                     className={`job-item-card glass-panel ${selectedJob?.slug === job.slug ? 'active' : ''}`}
-                    onClick={() => setSelectedJob(job)}
+                    onClick={() => handleSelectJob(job)}
                   >
                     <div className="card-header-row">
                       <h4>{job.title}</h4>
@@ -338,7 +345,7 @@ const Jobs = () => {
                   <div 
                     key={app.jobSlug} 
                     className={`job-item-card glass-panel ${selectedJob?.slug === app.jobSlug ? 'active' : ''}`}
-                    onClick={() => setSelectedJob({ ...app, slug: app.jobSlug })}
+                    onClick={() => handleSelectJob({ ...app, slug: app.jobSlug })}
                   >
                     <div className="card-header-row">
                       <h4>{app.title}</h4>
@@ -368,6 +375,13 @@ const Jobs = () => {
         <div className="job-details-pane glass-panel">
           {selectedJob ? (
             <div className="details-container animate-fade-in">
+              <button 
+                className="btn btn-secondary back-to-list-btn" 
+                style={{ marginBottom: '16px', display: 'none' }}
+                onClick={() => setMobileView('list')}
+              >
+                &larr; Back to Listings
+              </button>
               <div className="details-header-block">
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start' }}>
                   <div>
@@ -927,11 +941,21 @@ const Jobs = () => {
           font-weight: 600;
         }
 
+        .back-to-list-btn {
+          display: none !important;
+        }
         @media (max-width: 768px) {
+          .back-to-list-btn {
+            display: inline-flex !important;
+          }
           .jobs-pane-grid {
             grid-template-columns: 1fr;
           }
+          .job-list-pane {
+            display: ${mobileView === 'list' ? 'block' : 'none'} !important;
+          }
           .job-details-pane {
+            display: ${mobileView === 'details' ? 'block' : 'none'} !important;
             position: static;
             max-height: none;
           }

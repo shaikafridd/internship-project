@@ -42,6 +42,66 @@ const Navbar = ({ toggleSidebar }) => {
     }
   };
 
+  const getPageTitle = () => {
+    if (isCourseView) {
+      return (
+        <div className="navbar-breadcrumb">
+          <span className="back-link" onClick={() => navigate('/courses')}>&larr; My Courses</span>
+          <span className="sep">&gt;</span>
+          <span className="current">UI/UX Design Fundamentals</span>
+        </div>
+      );
+    }
+    if (isProfileView) {
+      return (
+        <div className="navbar-breadcrumb">
+          <span className="back-link" onClick={() => navigate('/dashboard')}>&larr; Dashboard</span>
+          <span className="sep">&gt;</span>
+          <span className="current">My Profile</span>
+        </div>
+      );
+    }
+
+    const path = location.pathname;
+    const search = location.search;
+
+    if (path.startsWith('/admin')) {
+      const params = new URLSearchParams(search);
+      const tab = params.get('tab');
+      if (tab) {
+        return `Admin ${tab.charAt(0).toUpperCase() + tab.slice(1)}`;
+      }
+      return 'Admin Dashboard';
+    }
+
+    switch (path) {
+      case '/dashboard':
+        return 'Dashboard';
+      case '/courses':
+        return 'My Courses';
+      case '/certificates':
+        return 'Certificates';
+      case '/jobs':
+        return 'Applications';
+      case '/saved-jobs':
+        return 'Saved Jobs';
+      case '/ats-analyzer':
+        return 'ATS Optimizer';
+      case '/messages':
+        return 'Messages';
+      case '/payments':
+        return 'Payments';
+      case '/profile':
+        return 'Profile';
+      case '/settings':
+        return 'Settings';
+      default:
+        return '';
+    }
+  };
+
+  const pageTitle = getPageTitle();
+ 
   return (
     <header className="navbar">
       <div className="navbar-left">
@@ -52,23 +112,25 @@ const Navbar = ({ toggleSidebar }) => {
             <line x1="3" y1="18" x2="21" y2="18" />
           </svg>
         </button>
+
+        <img 
+          src="/logo.jpg" 
+          alt="CareerHub Logo" 
+          style={{ 
+            height: '32px', 
+            objectFit: 'contain',
+            marginRight: '8px',
+            borderRadius: '4px'
+          }} 
+          className="navbar-logo-mobile"
+        />
         
-        {isCourseView ? (
-          <div className="navbar-breadcrumb">
-            <span className="back-link" onClick={() => navigate('/courses')}>&larr; My Courses</span>
-            <span className="sep">&gt;</span>
-            <span className="current">UI/UX Design Fundamentals</span>
-          </div>
-        ) : isProfileView ? (
-          <div className="navbar-breadcrumb">
-            <span className="back-link" onClick={() => navigate('/dashboard')}>&larr; Dashboard</span>
-            <span className="sep">&gt;</span>
-            <span className="current">My Profile</span>
-          </div>
-        ) : location.pathname.startsWith('/admin') ? (
-          <h2 className="navbar-page-title">Admin Dashboard</h2>
-        ) : (
-          null
+        {pageTitle && (
+          typeof pageTitle === 'object' ? (
+            pageTitle
+          ) : (
+            <h2 className="navbar-page-title">{pageTitle}</h2>
+          )
         )}
       </div>
 
@@ -370,7 +432,14 @@ const Navbar = ({ toggleSidebar }) => {
           color: hsl(var(--text-primary));
         }
 
+        .navbar-logo-mobile {
+          display: none;
+        }
+
         @media (max-width: 992px) {
+          .navbar-logo-mobile {
+            display: block;
+          }
           .navbar {
             left: 0;
             padding: 0 20px;

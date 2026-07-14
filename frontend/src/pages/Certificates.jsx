@@ -112,7 +112,7 @@ const Certificates = () => {
       <style>{`
         .certs-grid {
           display: grid;
-          grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+          grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
           gap: 24px;
         }
 
@@ -122,6 +122,23 @@ const Certificates = () => {
           gap: 20px;
           align-items: flex-start;
           transition: var(--transition-normal);
+        }
+
+        @media (max-width: 480px) {
+          .cert-card {
+            flex-direction: column;
+            gap: 12px;
+            align-items: center;
+            text-align: center;
+          }
+          .meta-row {
+            flex-direction: column;
+            gap: 6px;
+            align-items: center;
+          }
+          .cert-actions {
+            width: 100%;
+          }
         }
 
         .cert-card:hover {

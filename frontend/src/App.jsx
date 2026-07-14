@@ -47,6 +47,31 @@ const AppContent = () => {
     return () => clearInterval(interval);
   }, [loading]);
 
+  useEffect(() => {
+    const path = location.pathname;
+    const search = location.search;
+    let title = 'CareerHub';
+
+    if (path === '/') {
+      title = 'CareerHub - Learn, Upskill, Apply, Get Hired';
+    } else if (path.startsWith('/admin')) {
+      const params = new URLSearchParams(search);
+      const tab = params.get('tab');
+      title = tab ? `Admin ${tab.charAt(0).toUpperCase() + tab.slice(1)} | CareerHub` : 'Admin Dashboard | CareerHub';
+    } else {
+      const cleanPath = path.substring(1);
+      if (cleanPath) {
+        let pageName = cleanPath.split('/')[0];
+        pageName = pageName.charAt(0).toUpperCase() + pageName.slice(1).replace(/-/g, ' ');
+        if (pageName === 'Ats analyzer') pageName = 'ATS Optimizer';
+        if (pageName === 'Jobs') pageName = 'Applications';
+        if (pageName === 'Courses') pageName = 'My Courses';
+        title = `${pageName} | CareerHub`;
+      }
+    }
+    document.title = title;
+  }, [location]);
+
   const toggleSidebar = () => {
     setSidebarOpen(!sidebarOpen);
   };

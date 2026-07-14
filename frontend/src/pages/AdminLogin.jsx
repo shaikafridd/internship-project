@@ -43,16 +43,101 @@ const AdminLogin = () => {
   };
 
   return (
-    <div className="auth-split-container animate-fade-in" style={{ background: '#0f172a', minHeight: '100vh', display: 'flex' }}>
+    <div className="admin-login-split-container animate-fade-in">
+      <style>{`
+        .admin-login-split-container {
+          display: flex;
+          background: #0f172a;
+          min-height: 100vh;
+          width: 100%;
+        }
 
-      <div className="auth-pitch-side" style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center', padding: '60px', background: 'rgba(255,255,255,0.01)', borderRight: '1px solid rgba(255,255,255,0.05)' }}>
+        .auth-pitch-side {
+          flex: 1;
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
+          padding: 60px;
+          background: rgba(255,255,255,0.01);
+          border-right: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .auth-form-side {
+          flex: 1;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          padding: 40px;
+        }
+
+        .auth-form-card {
+          width: 100%;
+          max-width: 440px;
+          padding: 40px;
+          background: rgba(255, 255, 255, 0.02);
+          border: 1px solid rgba(255, 255, 255, 0.06);
+          border-radius: 12px;
+          color: white;
+        }
+
+        .admin-auth-input {
+          width: 100%;
+          background: rgba(255,255,255,0.04);
+          color: white;
+          border: 1px solid rgba(255,255,255,0.1);
+          border-radius: 6px;
+          padding: 12px 12px 12px 42px;
+          fontSize: 0.9rem;
+          outline: none;
+          transition: all 0.2s;
+        }
+
+        .admin-auth-input:focus {
+          border-color: #2563eb;
+          background: rgba(255,255,255,0.07);
+          box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.2);
+        }
+
+        .admin-auth-btn {
+          width: 100%;
+          padding: 12px;
+          background: #2563eb;
+          border: none;
+          border-radius: 6px;
+          color: white;
+          font-size: 0.95rem;
+          font-weight: 700;
+          cursor: pointer;
+          transition: all 0.2s;
+        }
+
+        .admin-auth-btn:hover:not(:disabled) {
+          background: #1d4ed8;
+          transform: translateY(-1px);
+        }
+
+        .admin-auth-btn:disabled {
+          opacity: 0.6;
+          cursor: not-allowed;
+        }
+
+        @media (max-width: 992px) {
+          .auth-pitch-side {
+            display: none;
+          }
+          .auth-form-side {
+            padding: 24px;
+          }
+          .auth-form-card {
+            padding: 30px 24px;
+          }
+        }
+      `}</style>
+
+      <div className="auth-pitch-side">
         <div className="auth-pitch-header" style={{ marginBottom: '40px' }}>
-          <div className="logo" style={{ color: 'white', display: 'flex', alignItems: 'center', gap: '10px', fontSize: '1.5rem' }}>
-            <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" style={{ color: '#2563eb' }}>
-              <path d="M22 10v6M2 10l10-5 10 5-10 5z" />
-              <path d="M6 12v5c0 2 2 3 6 3s6-1 6-3v-5" />
-            </svg>
-            <span style={{ fontWeight: 800 }}>CareerHub Admin</span>
+          <div className="logo" style={{ cursor: 'pointer' }}>
+            <img src="/logo.jpg" alt="CareerHub Logo" style={{ height: '40px', objectFit: 'contain', borderRadius: '4px' }} />
           </div>
         </div>
 
@@ -85,8 +170,8 @@ const AdminLogin = () => {
         </div>
       </div>
 
-      <div className="auth-form-side" style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '40px' }}>
-        <div className="auth-form-card glass-panel" style={{ width: '100%', maxWidth: '440px', padding: '40px', background: 'rgba(255, 255, 255, 0.02)', border: '1px solid rgba(255, 255, 255, 0.06)', borderRadius: '12px', color: 'white' }}>
+      <div className="auth-form-side">
+        <div className="auth-form-card glass-panel">
 
           <div className="auth-form-header" style={{ marginBottom: '30px' }}>
             <h3 style={{ color: 'white', fontSize: '1.8rem', fontWeight: 800, margin: '0 0 8px' }}>Welcome back, Admin!</h3>
@@ -118,14 +203,13 @@ const AdminLogin = () => {
                 <input
                   id="admin-username"
                   type="text"
-                  className="form-control"
+                  className="admin-auth-input"
                   placeholder="admin"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   required
                   autoComplete="username"
                   disabled={isSubmitting}
-                  style={{ width: '100%', background: 'rgba(255,255,255,0.04)', color: 'white', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '6px', padding: '12px 12px 12px 42px', fontSize: '0.9rem', outline: 'none' }}
                 />
               </div>
             </div>
@@ -139,25 +223,23 @@ const AdminLogin = () => {
                 </svg>
                 <input
                   type="password"
-                  className="form-control"
+                  className="admin-auth-input"
                   placeholder="Enter secure password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
                   disabled={isSubmitting}
-                  style={{ width: '100%', background: 'rgba(255,255,255,0.04)', color: 'white', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '6px', padding: '12px 12px 12px 42px', fontSize: '0.9rem', outline: 'none' }}
                 />
               </div>
             </div>
 
-            <button type="submit" className="btn btn-primary" style={{ width: '100%', padding: '12px', background: '#2563eb', border: 'none', borderRadius: '6px', color: 'white', fontSize: '0.95rem', fontWeight: '700', cursor: 'pointer', transition: 'all 0.2s' }} disabled={isSubmitting}>
-              {isSubmitting ? 'Verifying system credentials...' : 'Enter System Admin Panel'}
+            <button type="submit" className="admin-auth-btn" disabled={isSubmitting}>
+              {isSubmitting ? 'Verifying credentials...' : 'Enter System Admin Panel'}
             </button>
           </form>
 
         </div>
       </div>
-
     </div>
   );
 };

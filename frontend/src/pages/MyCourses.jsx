@@ -1303,6 +1303,30 @@ const MyCourses = () => {
             max-height: none;
           }
         }
+        @media (max-width: 576px) {
+          .mock-browser-window {
+            display: none !important;
+          }
+          .poster-left {
+            max-width: 100% !important;
+          }
+          .poster-left h1 {
+            font-size: 1.5rem !important;
+          }
+          .poster-left p {
+            font-size: 0.8rem !important;
+          }
+          .custom-video-poster-overlay {
+            padding: 0 20px !important;
+          }
+          .lesson-specs-grid {
+            grid-template-columns: repeat(2, 1fr) !important;
+            gap: 12px !important;
+          }
+          .checklist-grid {
+            grid-template-columns: 1fr !important;
+          }
+        }
       `}</style>
     </div>
   );

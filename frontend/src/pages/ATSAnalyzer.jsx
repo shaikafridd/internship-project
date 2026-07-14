@@ -893,6 +893,16 @@ const ATSAnalyzer = () => {
             grid-template-columns: 1fr;
           }
         }
+        @media (max-width: 576px) {
+          .top-match-hero-block {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 16px;
+          }
+          .hero-score-wrapper {
+            align-items: flex-start;
+          }
+        }
       `}</style>
     </div>
   );

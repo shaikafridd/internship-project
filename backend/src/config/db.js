@@ -237,10 +237,10 @@ const connectDB = async () => {
 
   if (hasPrimaryUri) {
     console.error('Atlas connection failed. Please verify your MONGODB_URI, username, password, network access, and cluster IP allowlist.');
-    process.exit(1);
+    console.log('Falling back to MongoMemoryServer for developer sandbox/standalone execution...');
+  } else {
+    console.log('No MongoDB instance available. Spinning up MongoMemoryServer for standalone execution...');
   }
-
-  console.log('No MongoDB instance available. Spinning up MongoMemoryServer for standalone execution...');
 
   try {
     const mongoServer = await MongoMemoryServer.create({

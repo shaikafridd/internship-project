@@ -527,7 +527,7 @@ const AdminDashboard = () => {
             {/* ROW 4: ENROLLMENTS, UPLOADS & SYSTEM OVERVIEW */}
             <div className="admin-tables-row-grid">
               {/* Left: Recent Enrollments */}
-              <div className="admin-card-panel glass-panel">
+              <div className="admin-card-panel glass-panel col-span-2">
                 <div className="panel-header-row">
                   <h3>Recent Enrollments</h3>
                 </div>
@@ -624,47 +624,49 @@ const AdminDashboard = () => {
               </div>
             </div>
 
-            <table className="admin-data-table font-table">
-              <thead>
-                <tr>
-                  <th>Student Name</th>
-                  <th>Email Address</th>
-                  <th>Location</th>
-                  <th>Phone Number</th>
-                  <th>Registered On</th>
-                  <th style={{ textAlign: 'right' }}>Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {filteredUsers.length > 0 ? (
-                  filteredUsers.map(u => (
-                    <tr key={u.id}>
-                      <td style={{ fontWeight: 700 }}>{u.name}</td>
-                      <td>{u.email}</td>
-                      <td>{u.location}</td>
-                      <td>{u.phone}</td>
-                      <td>{new Date(u.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</td>
-                      <td style={{ textAlign: 'right' }}>
-                        <button
-                          className="icon-action-btn"
-                          onClick={() => handleDeleteUser(u.id)}
-                          title="Delete User"
-                          style={{ color: '#ef4444' }}
-                        >
-                          🗑️
-                        </button>
+            <div className="table-responsive">
+              <table className="admin-data-table font-table">
+                <thead>
+                  <tr>
+                    <th>Student Name</th>
+                    <th>Email Address</th>
+                    <th>Location</th>
+                    <th>Phone Number</th>
+                    <th>Registered On</th>
+                    <th style={{ textAlign: 'right' }}>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredUsers.length > 0 ? (
+                    filteredUsers.map(u => (
+                      <tr key={u.id}>
+                        <td style={{ fontWeight: 700 }}>{u.name}</td>
+                        <td>{u.email}</td>
+                        <td>{u.location}</td>
+                        <td>{u.phone}</td>
+                        <td>{new Date(u.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</td>
+                        <td style={{ textAlign: 'right' }}>
+                          <button
+                            className="icon-action-btn"
+                            onClick={() => handleDeleteUser(u.id)}
+                            title="Delete User"
+                            style={{ color: '#ef4444' }}
+                          >
+                            🗑️
+                          </button>
+                        </td>
+                      </tr>
+                    ))
+                  ) : (
+                    <tr>
+                      <td colSpan="6" style={{ textAlign: 'center', padding: '30px', color: '#94a3b8' }}>
+                        No registered students found matching your criteria.
                       </td>
                     </tr>
-                  ))
-                ) : (
-                  <tr>
-                    <td colSpan="6" style={{ textAlign: 'center', padding: '30px', color: '#94a3b8' }}>
-                      No registered students found matching your criteria.
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
+                  )}
+                </tbody>
+              </table>
+            </div>
           </div>
         )}
 
@@ -716,7 +718,7 @@ const AdminDashboard = () => {
                         const isUploading = uploadingLessonKey === lessonKey;
                         return (
                           <div key={lesson.id || lIdx} style={{ border: '1px solid #e2e8f0', borderRadius: '6px', padding: '12px', background: '#ffffff' }}>
-                            <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 2fr auto', gap: '12px', alignItems: 'center' }}>
+                            <div className="curriculum-lesson-row">
                               <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
                                 <label style={{ fontSize: '0.7rem', fontWeight: 600, color: '#64748b' }}>Video / Lesson Title</label>
                                 <input 
@@ -832,46 +834,48 @@ const AdminDashboard = () => {
                 </form>
               )}
 
-              <table className="admin-data-table">
-                <thead>
-                  <tr>
-                    <th>Course</th>
-                    <th>Instructor</th>
-                    <th>Students</th>
-                    <th>Price</th>
-                    <th>Status</th>
-                    <th style={{ textAlign: 'right' }}>Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {courses.map(c => (
-                    <tr key={c.id}>
-                      <td style={{ fontWeight: 700 }}>{c.name}</td>
-                      <td>{c.instructor}</td>
-                      <td>{c.students}</td>
-                      <td style={{ fontWeight: 600 }}>{c.price}</td>
-                      <td>
-                        <span
-                          onClick={() => toggleCourseStatus(c.id)}
-                          className={`badge ${c.status === 'Published' ? 'badge-success' : 'badge-secondary'}`}
-                          style={{ cursor: 'pointer' }}
-                          title="Click to toggle status"
-                        >
-                          {c.status}
-                        </span>
-                      </td>
-                      <td style={{ textAlign: 'right' }}>
-                        <div className="actions-icons-row" style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end' }}>
-                          <button className="icon-action-btn" onClick={() => handleSelectCurriculum(c)} title="Manage Curriculum/Videos">🎥</button>
-                          <button className="icon-action-btn" onClick={() => handleEditCourse(c)} title="Edit">✏️</button>
-                          <button className="icon-action-btn" onClick={() => toggleCourseStatus(c.id)} title="Toggle Status">⚙️</button>
-                          <button className="icon-action-btn" onClick={() => handleDeleteCourse(c.id)} title="Delete" style={{ color: '#ef4444' }}>🗑️</button>
-                        </div>
-                      </td>
+              <div className="table-responsive">
+                <table className="admin-data-table">
+                  <thead>
+                    <tr>
+                      <th>Course</th>
+                      <th>Instructor</th>
+                      <th>Students</th>
+                      <th>Price</th>
+                      <th>Status</th>
+                      <th style={{ textAlign: 'right' }}>Actions</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody>
+                    {courses.map(c => (
+                      <tr key={c.id}>
+                        <td style={{ fontWeight: 700 }}>{c.name}</td>
+                        <td>{c.instructor}</td>
+                        <td>{c.students}</td>
+                        <td style={{ fontWeight: 600 }}>{c.price}</td>
+                        <td>
+                          <span
+                            onClick={() => toggleCourseStatus(c.id)}
+                            className={`badge ${c.status === 'Published' ? 'badge-success' : 'badge-secondary'}`}
+                            style={{ cursor: 'pointer' }}
+                            title="Click to toggle status"
+                          >
+                            {c.status}
+                          </span>
+                        </td>
+                        <td style={{ textAlign: 'right' }}>
+                          <div className="actions-icons-row" style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end' }}>
+                            <button className="icon-action-btn" onClick={() => handleSelectCurriculum(c)} title="Manage Curriculum/Videos">🎥</button>
+                            <button className="icon-action-btn" onClick={() => handleEditCourse(c)} title="Edit">✏️</button>
+                            <button className="icon-action-btn" onClick={() => toggleCourseStatus(c.id)} title="Toggle Status">⚙️</button>
+                            <button className="icon-action-btn" onClick={() => handleDeleteCourse(c.id)} title="Delete" style={{ color: '#ef4444' }}>🗑️</button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             </div>
           )
         )}
@@ -923,52 +927,54 @@ const AdminDashboard = () => {
               </form>
             )}
 
-            <table className="admin-data-table font-table">
-              <thead>
-                <tr>
-                  <th>Student</th>
-                  <th>Course</th>
-                  <th>Amount</th>
-                  <th>Status</th>
-                  <th>Date</th>
-                  <th style={{ textAlign: 'right' }}>Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {payments.map(p => (
-                  <tr key={p.id}>
-                    <td style={{ fontWeight: 700 }}>{p.student}</td>
-                    <td>{p.course}</td>
-                    <td style={{ fontWeight: 600 }}>{p.amount}</td>
-                    <td>
-                      <span
-                        onClick={() => togglePaymentStatus(p.id)}
-                        className={`badge ${p.status === 'Paid' || p.status === 'Completed' ? 'badge-success' : 'badge-warning'}`}
-                        style={{ cursor: 'pointer' }}
-                        title="Click to toggle status"
-                      >
-                        {p.status}
-                      </span>
-                    </td>
-                    <td>{p.date}</td>
-                    <td style={{ textAlign: 'right' }}>
-                      <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
-                        <button className="icon-action-btn" onClick={() => handleEditPayment(p)} title="Edit">✏️</button>
-                        <button className="icon-action-btn" onClick={() => togglePaymentStatus(p.id)} title="Toggle Status">⚙️</button>
-                        <button className="icon-action-btn" onClick={() => handleDeletePayment(p.id)} title="Delete" style={{ color: '#ef4444' }}>🗑️</button>
-                      </div>
-                    </td>
+            <div className="table-responsive">
+              <table className="admin-data-table font-table">
+                <thead>
+                  <tr>
+                    <th>Student</th>
+                    <th>Course</th>
+                    <th>Amount</th>
+                    <th>Status</th>
+                    <th>Date</th>
+                    <th style={{ textAlign: 'right' }}>Actions</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {payments.map(p => (
+                    <tr key={p.id}>
+                      <td style={{ fontWeight: 700 }}>{p.student}</td>
+                      <td>{p.course}</td>
+                      <td style={{ fontWeight: 600 }}>{p.amount}</td>
+                      <td>
+                        <span
+                          onClick={() => togglePaymentStatus(p.id)}
+                          className={`badge ${p.status === 'Paid' || p.status === 'Completed' ? 'badge-success' : 'badge-warning'}`}
+                          style={{ cursor: 'pointer' }}
+                          title="Click to toggle status"
+                        >
+                          {p.status}
+                        </span>
+                      </td>
+                      <td>{p.date}</td>
+                      <td style={{ textAlign: 'right' }}>
+                        <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
+                          <button className="icon-action-btn" onClick={() => handleEditPayment(p)} title="Edit">✏️</button>
+                          <button className="icon-action-btn" onClick={() => togglePaymentStatus(p.id)} title="Toggle Status">⚙️</button>
+                          <button className="icon-action-btn" onClick={() => handleDeletePayment(p.id)} title="Delete" style={{ color: '#ef4444' }}>🗑️</button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
         )}
 
         {/* ─── TAB 5: MESSAGES VIEW ────────────────────────────────────────── */}
         {activeTab === 'messages' && (
-          <div className="admin-card-panel glass-panel" style={{ gridColumn: '1 / -1', display: 'grid', gridTemplateColumns: '1fr 2fr', gap: '20px' }}>
-            <div style={{ borderRight: '1px solid #e2e8f0', paddingRight: '20px' }}>
+          <div className="admin-card-panel glass-panel admin-messages-grid">
+            <div className="messages-list-pane">
               <h2 style={{ fontSize: '1.4rem', fontWeight: 800, margin: '0 0 8px', color: 'hsl(var(--text-primary))' }}>Inbox Messages</h2>
               <p style={{ fontSize: '0.85rem', color: '#64748b', margin: '0 0 20px' }}>Manage user feedback and customer support tickets.</p>
 
@@ -1046,7 +1052,7 @@ const AdminDashboard = () => {
             <h2 style={{ fontSize: '1.4rem', fontWeight: 800, margin: '0 0 6px', color: 'hsl(var(--text-primary))' }}>Platform Settings & Server Control</h2>
             <p style={{ fontSize: '0.85rem', color: '#64748b', margin: '0 0 24px' }}>Monitor cluster specifications, configure auth keys, and change admin credentials.</p>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '40px' }}>
+            <div className="admin-settings-grid">
               {/* Left Column: Security Settings */}
               <div>
                 <h3 style={{ fontSize: '1.1rem', fontWeight: 700, margin: '0 0 16px', color: '#0f172a', borderBottom: '1px solid #e2e8f0', paddingBottom: '8px' }}>Security & Credentials</h3>

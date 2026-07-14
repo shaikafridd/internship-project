@@ -957,6 +957,36 @@ const Profile = () => {
             grid-template-columns: 1fr;
           }
         }
+        @media (max-width: 576px) {
+          .header-flex-row {
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+          }
+          .header-meta-details {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+          }
+          .details-list-vertical {
+            align-items: center;
+          }
+          .profile-sub-tabs {
+            flex-wrap: wrap;
+            gap: 6px;
+            justify-content: center;
+          }
+          .sub-tab-btn {
+            padding: 6px 10px;
+            font-size: 0.75rem;
+          }
+          .mini-stats-grid {
+            grid-template-columns: 1fr;
+          }
+          .ats-profile-summary-grid {
+            grid-template-columns: 1fr !important;
+          }
+        }
       `}</style>
     </div>
   );
