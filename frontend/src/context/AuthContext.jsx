@@ -11,16 +11,36 @@ export const AuthProvider = ({ children }) => {
   // Load user data on startup if token exists
   useEffect(() => {
     const loadUser = async () => {
+      const token = localStorage.getItem('token');
+      const adminToken = localStorage.getItem('admin_token');
+
       try {
-        const res = await authAPI.getMe();
-        if (res.success && res.data) {
-          setUser(res.data);
+        if (adminToken) {
+          const res = await adminAPI.getDashboard();
+          if (res.success && res.data) {
+            setUser({
+              id: res.data.adminId,
+              username: res.data.username,
+              role: 'admin'
+            });
+          } else {
+            localStorage.removeItem('admin_token');
+          }
+        } else if (token) {
+          const res = await authAPI.getMe();
+          if (res.success && res.data) {
+            setUser(res.data);
+          } else {
+            localStorage.removeItem('token');
+          }
+        }
+      } catch (err) {
+        console.error('Failed to verify token:', err.message);
+        if (adminToken) {
+          localStorage.removeItem('admin_token');
         } else {
           localStorage.removeItem('token');
         }
-      } catch (err) {
-        console.error('Failed to verify token', err.message);
-        localStorage.removeItem('token');
       } finally {
         setLoading(false);
       }

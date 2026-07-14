@@ -1,6 +1,7 @@
 const Admin = require('../models/Admin');
 const Course = require('../models/Course');
 const Order = require('../models/Order');
+const User = require('../models/User');
 const jwt = require('jsonwebtoken');
 
 // ─────────────────────────────────────────────
@@ -127,7 +128,10 @@ exports.getCoursesAdmin = async (req, res) => {
       instructor: c.instructor,
       students: '0',
       price: `₹${c.price.toLocaleString('en-IN')}`,
-      status: 'Published'
+      status: 'Published',
+      sections: c.sections || [],
+      description: c.description || '',
+      category: c.category || 'Development'
     }));
     return res.status(200).json({
       success: true,
@@ -143,26 +147,19 @@ exports.getCoursesAdmin = async (req, res) => {
 
 exports.createCourse = async (req, res) => {
   try {
-    const { name, instructor, price } = req.body;
+    const { name, instructor, price, description, category, sections } = req.body;
     const cleanPrice = typeof price === 'string' ? parseInt(price.replace(/[^0-9]/g, ''), 10) : price;
 
     const course = await Course.create({
       title: name,
       instructor: instructor || 'Admin',
       price: cleanPrice || 0,
-      description: 'Course created by administrator via dashboard.',
-      category: 'Development',
-      image: 'react_beginners.png',
+      description: description || 'Course created by administrator via dashboard.',
+      category: category || 'Development',
+      image: 'default_course.png',
       duration: '10h 00m',
       lessonsCount: 10,
-      sections: [
-        {
-          title: 'Section 1: Introduction',
-          lessons: [
-            { id: Math.random().toString().substring(2,8), title: 'Course Welcome Overview', duration: '05:00' }
-          ]
-        }
-      ]
+      sections: sections || []
     });
 
     return res.status(201).json({
@@ -173,7 +170,10 @@ exports.createCourse = async (req, res) => {
         instructor: course.instructor,
         students: '0',
         price: `₹${course.price.toLocaleString('en-IN')}`,
-        status: 'Published'
+        status: 'Published',
+        sections: course.sections,
+        description: course.description,
+        category: course.category
       },
     });
   } catch (err) {
@@ -186,7 +186,7 @@ exports.createCourse = async (req, res) => {
 
 exports.updateCourse = async (req, res) => {
   try {
-    const { name, instructor, price } = req.body;
+    const { name, instructor, price, sections, description, category } = req.body;
     const course = await Course.findById(req.params.id);
     if (!course) {
       return res.status(404).json({
@@ -200,6 +200,9 @@ exports.updateCourse = async (req, res) => {
     if (price !== undefined) {
       course.price = typeof price === 'string' ? parseInt(price.replace(/[^0-9]/g, ''), 10) : price;
     }
+    if (sections !== undefined) course.sections = sections;
+    if (description !== undefined) course.description = description;
+    if (category !== undefined) course.category = category;
 
     await course.save();
 
@@ -211,7 +214,10 @@ exports.updateCourse = async (req, res) => {
         instructor: course.instructor,
         students: '0',
         price: `₹${course.price.toLocaleString('en-IN')}`,
-        status: 'Published'
+        status: 'Published',
+        sections: course.sections,
+        description: course.description,
+        category: course.category
       },
     });
   } catch (err) {
@@ -284,7 +290,16 @@ exports.updatePaymentStatusAdmin = async (req, res) => {
       });
     }
 
-    order.status = order.status === 'Completed' ? 'Pending' : 'Completed';
+    if (req.body.status !== undefined) {
+      order.status = req.body.status;
+    } else {
+      order.status = order.status === 'Completed' ? 'Pending' : 'Completed';
+    }
+
+    if (req.body.amount !== undefined) {
+      order.totalAmount = req.body.amount;
+    }
+
     await order.save();
 
     return res.status(200).json({
@@ -315,6 +330,130 @@ exports.deletePaymentAdmin = async (req, res) => {
       success: true,
       message: 'Order deleted successfully',
     });
+  } catch (err) {
+    return res.status(500).json({
+      success: false,
+      message: err.message,
+    });
+  }
+};
+
+exports.getUsersAdmin = async (req, res) => {
+  try {
+    const users = await User.find({ role: { $ne: 'admin' } }).select('-password');
+    return res.status(200).json({
+      success: true,
+      data: users.map(u => ({
+        id: u._id,
+        name: u.name,
+        email: u.email,
+        location: u.location || 'N/A',
+        phone: u.phone || 'N/A',
+        createdAt: u.createdAt
+      }))
+    });
+  } catch (err) {
+    return res.status(500).json({
+      success: false,
+      message: err.message,
+    });
+  }
+};
+
+exports.deleteUserAdmin = async (req, res) => {
+  try {
+    const user = await User.findById(req.params.id);
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'User not found',
+      });
+    }
+
+    await user.deleteOne();
+
+    return res.status(200).json({
+      success: true,
+      message: 'User deleted successfully',
+    });
+  } catch (err) {
+    return res.status(500).json({
+      success: false,
+      message: err.message,
+    });
+  }
+};
+
+exports.uploadVideoAdmin = async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({
+        success: false,
+        message: 'No video file provided',
+      });
+    }
+
+    const fs = require('fs');
+    const path = require('path');
+    const { cloudinary, isCloudinaryConfigured } = require('../config/cloudinary');
+
+    const fileName = req.file.originalname;
+    const fileSize = req.file.size;
+
+    if (isCloudinaryConfigured) {
+      const uploadStream = () => {
+        return new Promise((resolve, reject) => {
+          const stream = cloudinary.uploader.upload_stream(
+            {
+              resource_type: 'video',
+              folder: 'careerhub_videos',
+            },
+            (error, result) => {
+              if (error) reject(error);
+              else resolve(result);
+            }
+          );
+          stream.end(req.file.buffer);
+        });
+      };
+
+      const result = await uploadStream();
+      return res.status(200).json({
+        success: true,
+        message: 'Video uploaded to Cloudinary successfully',
+        data: {
+          url: result.secure_url,
+          name: fileName,
+          size: `${(fileSize / (1024 * 1024)).toFixed(1)} MB`,
+          uploadedAt: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+        }
+      });
+    } else {
+      const publicUploadsDir = path.join(__dirname, '..', '..', 'public', 'uploads');
+      if (!fs.existsSync(publicUploadsDir)) {
+        fs.mkdirSync(publicUploadsDir, { recursive: true });
+      }
+
+      const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
+      const ext = path.extname(fileName) || '.mp4';
+      const cleanFileName = uniqueSuffix + ext;
+      const filePath = path.join(publicUploadsDir, cleanFileName);
+
+      fs.writeFileSync(filePath, req.file.buffer);
+
+      const absoluteUrl = `${req.protocol}://${req.get('host')}/uploads/${cleanFileName}`;
+
+      return res.status(200).json({
+        success: true,
+        message: 'Video uploaded locally successfully (Cloudinary config missing)',
+        data: {
+          url: absoluteUrl,
+          name: fileName,
+          size: `${(fileSize / (1024 * 1024)).toFixed(1)} MB`,
+          uploadedAt: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+        }
+      });
+    }
   } catch (err) {
     return res.status(500).json({
       success: false,

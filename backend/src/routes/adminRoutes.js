@@ -1,4 +1,5 @@
 const express = require('express');
+const multer = require('multer');
 const {
   adminLogin,
   adminDashboard,
@@ -8,9 +9,14 @@ const {
   deleteCourse,
   getPaymentsAdmin,
   updatePaymentStatusAdmin,
-  deletePaymentAdmin
+  deletePaymentAdmin,
+  getUsersAdmin,
+  deleteUserAdmin,
+  uploadVideoAdmin
 } = require('../controllers/adminController');
 const { verifyAdminToken } = require('../middleware/adminMiddleware');
+
+const upload = multer({ limits: { fileSize: 100 * 1024 * 1024 } }); // 100MB limit
 
 const router = express.Router();
 
@@ -19,6 +25,13 @@ router.post('/login', adminLogin);
 
 // Protected: Admin dashboard data
 router.get('/dashboard', verifyAdminToken, adminDashboard);
+
+// Protected: Admin user management
+router.get('/users', verifyAdminToken, getUsersAdmin);
+router.delete('/users/:id', verifyAdminToken, deleteUserAdmin);
+
+// Protected: Admin video uploads (Cloudinary / Local static fallback)
+router.post('/videos/upload', verifyAdminToken, upload.single('file'), uploadVideoAdmin);
 
 // Protected: Admin course management
 router.get('/courses', verifyAdminToken, getCoursesAdmin);

@@ -11,6 +11,7 @@ const jobRoutes = require('./src/routes/jobRoutes');
 const atsRoutes = require('./src/routes/atsRoutes');
 const profileRoutes = require('./src/routes/profileRoutes');
 const adminRoutes = require('./src/routes/adminRoutes');
+const path = require('path');
 const { seedAdmin } = require('./src/controllers/adminController');
 
 // Load environment variables
@@ -22,6 +23,9 @@ connectDB().then(() => {
 });
 
 const app = express();
+
+// Serve static uploads
+app.use('/uploads', express.static(path.join(__dirname, 'public', 'uploads')));
 
 // Enable Cross-Origin Resource Sharing (CORS) for production requests
 app.use(cors());

@@ -165,6 +165,20 @@ export const adminAPI = {
   login: (username, password) => adminApi.post('/admin/login', { username, password }),
   // Protected: fetches dashboard stats (uses admin_token via interceptor)
   getDashboard: () => adminApi.get('/admin/dashboard'),
+  // Users Management
+  getUsers: () => adminApi.get('/admin/users'),
+  deleteUser: (id) => adminApi.delete(`/admin/users/${id}`),
+  // Video Upload
+  uploadVideo: (file, onUploadProgress) => {
+    const formData = new FormData();
+    formData.append('file', file);
+    return adminApi.post('/admin/videos/upload', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+      onUploadProgress,
+    });
+  },
   // Courses CRUD
   getCourses: () => adminApi.get('/admin/courses'),
   createCourse: (courseData) => adminApi.post('/admin/courses', courseData),
@@ -172,7 +186,7 @@ export const adminAPI = {
   deleteCourse: (id) => adminApi.delete(`/admin/courses/${id}`),
   // Payments CRUD
   getPayments: () => adminApi.get('/admin/payments'),
-  updatePaymentStatus: (id) => adminApi.put(`/admin/payments/${id}`),
+  updatePaymentStatus: (id, paymentData) => adminApi.put(`/admin/payments/${id}`, paymentData),
   deletePayment: (id) => adminApi.delete(`/admin/payments/${id}`),
 };
 
