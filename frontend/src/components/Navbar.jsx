@@ -129,7 +129,20 @@ const Navbar = ({ toggleSidebar }) => {
           typeof pageTitle === 'object' ? (
             pageTitle
           ) : (
-            <h2 className="navbar-page-title">{pageTitle}</h2>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+              <img 
+                src="/logo.jpg" 
+                alt="Logo" 
+                style={{ 
+                  height: '28px', 
+                  width: '28px', 
+                  objectFit: 'cover', 
+                  borderRadius: '6px',
+                  border: '1px solid hsl(var(--border-color))'
+                }} 
+              />
+              <h2 className="navbar-page-title">{pageTitle}</h2>
+            </div>
           )
         )}
       </div>
