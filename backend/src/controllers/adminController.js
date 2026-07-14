@@ -3,6 +3,7 @@ const Course = require('../models/Course');
 const Order = require('../models/Order');
 const User = require('../models/User');
 const jwt = require('jsonwebtoken');
+const { cloudinary, isCloudinaryConfigured } = require('../config/cloudinary');
 
 // ─────────────────────────────────────────────
 // Seed / bootstrap: create the default admin
@@ -403,7 +404,6 @@ exports.uploadVideoAdmin = async (req, res) => {
 
     const fs = require('fs');
     const path = require('path');
-    const { cloudinary, isCloudinaryConfigured } = require('../config/cloudinary');
 
     const fileName = req.file.originalname;
     const fileSize = req.file.size;
