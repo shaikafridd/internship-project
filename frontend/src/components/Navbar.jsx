@@ -113,17 +113,17 @@ const Navbar = ({ toggleSidebar }) => {
           </svg>
         </button>
 
-        <img 
-          src="/logo.jpg" 
-          alt="CareerHub Logo" 
-          style={{ 
-            height: '32px', 
-            objectFit: 'contain',
-            marginRight: '8px',
-            borderRadius: '4px'
-          }} 
+        <div 
+          onClick={() => navigate('/')} 
+          style={{ cursor: 'pointer' }}
           className="navbar-logo-mobile"
-        />
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ color: 'hsl(var(--primary))' }}>
+            <path d="M22 10v6M2 10l10-5 10 5-10 5z" />
+            <path d="M6 12v5c0 2 2 3 6 3s6-1 6-3v-5" />
+          </svg>
+          <span style={{ fontFamily: 'var(--font-title)', fontWeight: 800, fontSize: '1.15rem', color: 'hsl(var(--text-primary))' }}>CareerHub</span>
+        </div>
         
         {pageTitle && (
           typeof pageTitle === 'object' ? (
@@ -451,7 +451,9 @@ const Navbar = ({ toggleSidebar }) => {
 
         @media (max-width: 992px) {
           .navbar-logo-mobile {
-            display: block;
+            display: flex;
+            align-items: center;
+            gap: 8px;
           }
           .navbar {
             left: 0;
